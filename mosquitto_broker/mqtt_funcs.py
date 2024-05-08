@@ -1,5 +1,7 @@
 import subprocess
-from config import Config 
+
+from config import Config
+
 
 def create_mosquitto_user(username, password):
     try:
@@ -17,10 +19,3 @@ def delete_mosquitto_user(username):
         print(f"User '{username}' deleted successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error: Failed to delete user '{username}': {e}")
-
-
-username = "alicee"
-password = "1234qwe"
-create_mosquitto_user(username, password)
-
-delete_mosquitto_user(username)
