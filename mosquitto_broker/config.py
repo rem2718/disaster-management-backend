@@ -17,3 +17,5 @@ class Config:
 
     BUFFER_PATH = os.getenv("BUFFER_PATH")
     QUEUE_LIMIT = int(os.getenv("QUEUE_LIMIT"))
+    
+    SYS_PASS = os.getenv("SYS_PASS")
