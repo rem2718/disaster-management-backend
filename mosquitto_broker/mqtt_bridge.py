@@ -1,39 +1,22 @@
 import json
 import time
-import os
 
 import paho.mqtt.client as paho
-from dotenv import load_dotenv
 from paho import mqtt
 
-from buffer import Buffer
-
-load_dotenv(".bridge_env")
-
-
-cloud_user = os.getenv("CLOUD_USER")
-cloud_password = os.getenv("CLOUD_PASS")
-cloud_address = os.getenv("CLOUD_ADDRESS")
-cloud_port = int(os.getenv("CLOUD_PORT"))
-
-local_user = os.getenv("LOCAL_USER")
-local_password = os.getenv("LOCAL_PASS")
-local_address = os.getenv("LOCAL_ADDRESS")
-local_port = int(os.getenv("LOCAL_PORT"))
-
-buffer_path = os.getenv("BUFFER_PATH")
-queue_limit = int(os.getenv("QUEUE_LIMIT"))
+from buffer.buffer import Buffer
+from config import Config
 
 connected = False
 
-buffer = Buffer(buffer_path, queue_limit)
+buffer = Buffer(Config.BUFFER_PATH, Config.QUEUE_LIMIT)
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
     global connected
     if rc == 0:
         print(f"Connected to {client._port}")
-        if client._port == local_port:
+        if client._port == Config.LOCAL_PORT:
             client.subscribe("cloud/#", qos=1)
         else:
             connected = True
@@ -70,20 +53,22 @@ def on_message(client, userdata, msg):
             buffer.buffer_to_queue(topic, data)
 
 
-cloud_client = paho.Client(client_id=cloud_user, userdata=None, protocol=paho.MQTTv5)
-local_client = paho.Client(client_id=local_user, userdata=None)
+cloud_client = paho.Client(
+    client_id=Config.CLOUD_USER, userdata=None, protocol=paho.MQTTv5
+)
+local_client = paho.Client(client_id=Config.LOCAL_USER, userdata=None)
 
 cloud_client.on_connect = on_connect
 local_client.on_connect = on_connect
 local_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
 
-cloud_client.username_pw_set(cloud_user, cloud_password)
-local_client.username_pw_set(local_user, local_password)
+cloud_client.username_pw_set(Config.CLOUD_USER, Config.CLOUD_PASS)
+local_client.username_pw_set(Config.LOCAL_USER, Config.LOCAL_PASS)
 cloud_client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 
-cloud_client.connect(cloud_address, cloud_port)
-local_client.connect(local_address, local_port)
+cloud_client.connect(Config.CLOUD_ADDRESS, Config.CLOUD_PORT)
+local_client.connect(Config.LOCAL_ADDRESS, Config.LOCAL_PORT)
 
 local_client.loop_start()
 cloud_client.loop_start()
