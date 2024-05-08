@@ -1,0 +1,40 @@
+[
+    {
+        "device": "robot",
+        "command": "switch",
+        "mode": "controlled"
+    },
+    {
+        "device": "robot",
+        "command": "switch",
+        "mode": "autonomous"
+    },
+    {
+        "device": "motor",
+        "command": "move",
+        "value": [
+            -1,
+            1
+        ]
+    },
+    {
+        "device": "camera",
+        "command": "move",
+        "value": [
+            0,
+            -1
+        ]
+    },
+    {
+     
+        
+    },
+    {
+        "device": "arm",
+        "command": "grab"
+    },
+    {
+        "device": "arm",
+        "command": "release"
+    }
+]

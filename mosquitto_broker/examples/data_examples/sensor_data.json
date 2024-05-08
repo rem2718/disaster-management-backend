@@ -1,0 +1,65 @@
+[
+    {
+        "sensor": "temperature",
+        "value": 25.4,
+        "unit": "°C"
+    },
+    {
+        "sensor": "humidity",
+        "value": 50.2,
+        "unit": "%"
+    },
+    {
+        "sensor": "gas",
+        "value": 256,
+        "unit": "ppm"
+    },
+    {
+        "sensor": "co2",
+        "value": 40,
+        "unit": "ppm"
+    },
+    {
+        "sensor": "tvoc",
+        "value": 3,
+        "unit": "ppb"
+    },
+    {
+        "sensor": "accelerometer",
+        "value": [
+            11,
+            220,
+            140
+        ],
+        "unit": "m/s^2"
+    },
+    {
+        "sensor": "gyroscope",
+        "value": [
+            111,
+            20,
+            14
+        ],
+        "unit": "°/s"
+    },
+    {
+        "sensor": "ir",
+        "value": 1,
+        "unit": ""
+    },
+    {
+        "sensor": "ultrasonic",
+        "value": 13,
+        "unit": "cm"
+    },
+    {
+        "sensor": "sound",
+        "value": 560,
+        "unit": ""
+    },
+    {
+        "sensor": "battery",
+        "value": 75,
+        "unit": "%"
+    }
+]
