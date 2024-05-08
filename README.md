@@ -6,6 +6,7 @@
 ## Mosquitto Broker
 - The Mosquitto broker should be hosted on a device that is on the same LAN as the other robots.
 - First, you should install Mosquitto, and then copy and paste the configuration file _mosquitto.conf_ into your Mosquitto configuration directory.
+- place _acl\_file.conf_ inside your Mosquitto folder.
 - A _.env_ file will be provided to you; you have to adjust the values to suit your case.
 - Finally, you need to run _mqtt\_bridge.py_ to bridge all the cloud packets to the HiveMQ broker.
 

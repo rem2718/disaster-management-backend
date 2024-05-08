@@ -6,9 +6,10 @@ from paho import mqtt
 
 from buffer.buffer import Buffer
 from config import Config
+from mqtt_funcs import *
+
 
 connected = False
-
 buffer = Buffer(Config.BUFFER_PATH, Config.QUEUE_LIMIT)
 
 
@@ -51,6 +52,16 @@ def on_message(client, userdata, msg):
             print(f"Published message: {data['id']}")
         else:
             buffer.buffer_to_queue(topic, data)
+
+    elif msg.topic == "local/admin/create_user":
+        data_str = msg.payload.decode("utf-8")
+        data = json.loads(data_str)
+        create_mosquitto_user(data["username"], data["password"])
+
+    elif msg.topic == "local/admin/delete_user":
+        data_str = msg.payload.decode("utf-8")
+        data = json.loads(data_str)
+        create_mosquitto_user(data["username"])
 
 
 cloud_client = paho.Client(
