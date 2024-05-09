@@ -13,8 +13,6 @@ subnet = Config.SUBNET
 default_type = Config.DEFAULT_TYPE
 device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION", "BROKER"]
 
-print(default_type)
-
 
 def get_mac():
     mac_address = getmac.get_mac_address()
@@ -30,6 +28,9 @@ def scan_for_mqtt_brokers():
             brokers.append(host)
     ip = brokers[0] if brokers else ""
     return ip
+
+
+print("here", scan_for_mqtt_brokers())
 
 
 def login(username, password, root, login_window):

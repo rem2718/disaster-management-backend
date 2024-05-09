@@ -18,7 +18,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
     if rc == 0:
         print(f"Connected to {client._port}")
         if client._port == Config.LOCAL_PORT:
-            client.subscribe("cloud/#", qos=1)
+            client.subscribe("#", qos=1)
         else:
             connected = True
     else:
@@ -27,7 +27,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
         client.reconnect()
 
 
-def on_disconnect(client, userdata, rc):
+def on_disconnect(client, userdata, rc, properties=None):
     global connected
     connected = False
     print("Disconnected from MQTT broker. Retrying in 60 seconds...")
@@ -53,12 +53,12 @@ def on_message(client, userdata, msg):
         else:
             buffer.buffer_to_queue(topic, data)
 
-    elif msg.topic == "local/admin/create_user":
+    elif msg.topic == "local/admin/create-user":
         data_str = msg.payload.decode("utf-8")
         data = json.loads(data_str)
         create_mosquitto_user(data["username"], data["password"])
 
-    elif msg.topic == "local/admin/delete_user":
+    elif msg.topic == "local/admin/delete-user":
         data_str = msg.payload.decode("utf-8")
         data = json.loads(data_str)
         create_mosquitto_user(data["username"])

@@ -7,12 +7,13 @@ import json
 import paho.mqtt.client as paho
 from paho import mqtt
 
-user = "test-broker"
-password = "Test-broker12"
-address = "df29475dfed14680a1a57a1c8e98b400.s2.eu.hivemq.cloud"
-port = 8883
+user = "test-ugv"
+password = "test"
 
-topic = "cloud/test-ugv/sensor_data"
+address = "192.168.68.121"
+port = 1883
+
+topic = "local/reg/sensor-data"
 count = 0
 
 
@@ -43,12 +44,11 @@ def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
 
-client = paho.Client(client_id=user, userdata=None, protocol=paho.MQTTv5)
+client = paho.Client(client_id=user)
 client.username_pw_set(user, password)
 
 client.on_connect = on_connect
 client.on_message = on_message
-client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 
 client.connect(address, port)
 client.loop_start()
@@ -58,6 +58,7 @@ try:
         data = read_sensors()
         client.publish(topic, payload=json.dumps(data), qos=1)
         print(f"Published message: {data['id']}")
+        print("done")
         time.sleep(30)
 
 except KeyboardInterrupt:
