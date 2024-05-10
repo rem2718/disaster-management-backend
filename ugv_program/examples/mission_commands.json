@@ -1,0 +1,22 @@
+[
+    {
+        "command": "start"
+    },
+    {
+        "command": "end"
+    },
+    {
+        "command": "pause"
+    },
+    {
+        "command": "continue"
+    },
+    {
+        "command": "update",
+        "name": "newDevName",
+        "password": "newDevPassword"
+    },
+    {
+        "command": "delete"
+    }
+]

@@ -6,7 +6,7 @@ from paho import mqtt
 
 from buffer.buffer import Buffer
 from config import Config
-from mqtt_funcs import *
+from mosq_funcs import *
 
 
 connected = False
