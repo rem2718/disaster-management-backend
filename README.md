@@ -20,6 +20,8 @@
 
 - Ensure that you have Nginx installed first, and then copy and paste the configuration file **nginx.conf** into your Nginx configuration directory.
 
+- ffmpeg
+
 
 ## UGV Codes
 

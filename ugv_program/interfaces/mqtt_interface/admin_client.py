@@ -2,14 +2,13 @@ import json
 
 import paho.mqtt.client as paho
 
-from config import Config
+from config import env_get
 
-admin_user = Config.BROKER_ADMIN_NAME
-admin_password = Config.BROKER_ADMIN_PASS
+admin_user = env_get("BROKER_ADMIN_NAME")
+admin_password = env_get("BROKER_ADMIN_PASS")
 
 PORT = 1883
-CREATE_TOPIC = "local/admin/create-user"
-DELETE_TOPIC = "local/admin/delete-user"
+CREATE_TOPIC = f"local/admin/{env_get("BROKER_NAME")}/create-user"
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -32,17 +31,6 @@ def create_mqtt_user(addr, username, password):
         admin_client.connect(addr, PORT)
         data = {"username": username, "password": password}
         admin_client.publish(CREATE_TOPIC, payload=json.dumps(data), qos=1)
-        admin_client.disconnect()
-
-    except KeyboardInterrupt:
-        admin_client.disconnect()
-
-
-def delete_mqtt_user(addr, username):
-    try:
-        admin_client.connect(addr, PORT)
-        data = {"username": username}
-        admin_client.publish(DELETE_TOPIC, payload=json.dumps(data), qos=1)
         admin_client.disconnect()
 
     except KeyboardInterrupt:

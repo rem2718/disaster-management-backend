@@ -1,11 +1,11 @@
 import subprocess
 
-from config import Config
+from config import env_get
 
 
 def create_mosquitto_user(username, password):
     try:
-        command = f"echo '{Config.SYS_PASS}' | sudo -S mosquitto_passwd -b /etc/mosquitto/passwd {username} {password}"
+        command = f"echo '{env_get("SYS_PASS")}' | sudo -S mosquitto_passwd -b /etc/mosquitto/passwd {username} {password}"
         subprocess.run(command, shell=True, check=True)
         print(f"User '{username}' created successfully.")
     except subprocess.CalledProcessError as e:
@@ -14,7 +14,7 @@ def create_mosquitto_user(username, password):
 
 def delete_mosquitto_user(username):
     try:
-        command = f"echo '{Config.SYS_PASS}' | sudo -S mosquitto_passwd -D /etc/mosquitto/passwd {username}"
+        command = f"echo '{env_get("SYS_PASS")}' | sudo -S mosquitto_passwd -D /etc/mosquitto/passwd {username}"
         subprocess.run(command, shell=True, check=True)
         print(f"User '{username}' deleted successfully.")
     except subprocess.CalledProcessError as e:

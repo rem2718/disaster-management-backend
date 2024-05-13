@@ -1,15 +1,5 @@
 [
     {
-        "device": "robot",
-        "command": "switch",
-        "mode": "controlled"
-    },
-    {
-        "device": "robot",
-        "command": "switch",
-        "mode": "autonomous"
-    },
-    {
         "device": "motor",
         "command": "move",
         "value": [
@@ -25,10 +15,7 @@
             -1
         ]
     },
-    {
-     
-        
-    },
+    {},
     {
         "device": "arm",
         "command": "grab"

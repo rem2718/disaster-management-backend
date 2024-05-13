@@ -12,11 +12,18 @@
         "command": "continue"
     },
     {
+        "command": "auto"
+    },
+    {
+        "command": "control"
+    },
+    {
         "command": "update",
         "name": "newDevName",
         "password": "newDevPassword"
     },
     {
-        "command": "delete"
+        "command": "delete",
+        "name": "newDevName"
     }
 ]

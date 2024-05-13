@@ -1,17 +1,46 @@
 from tkinter import messagebox, ttk
 import tkinter as tk
 import requests
+import getmac
+import nmap
 
-from config import Config
-from utils.network_funcs import *
+from config import env_get
 
-token, dev_name, dev_password = None, None, None
-login_url = f"{Config.FLASK_URL}/api/users/login"
-dev_reg_url = f"{Config.FLASK_URL}/api/devices"
-
+token = dev_name = dev_password = broker_addr = broker_name = None
+login_url = f"{env_get("FLASK_URL")}/api/users/login"
+dev_reg_url = f"{env_get("FLASK_URL")}/api/devices"
+broker_url = f"{env_get("FLASK_URL")}/api/devices/broker_id"
+device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION"]
+subnet = env_get("SUBNET")
 skipped = False
-device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION", "BROKER"]
-broker_ip, broker_mac = scan_for_mqtt_brokers()
+
+
+def get_mac(ip=None):
+    mac_address = getmac.get_mac_address(ip=ip)
+    return mac_address
+
+
+def scan_for_mqtt_brokers():
+    nm = nmap.PortScanner()
+    nm.scan(hosts=subnet, arguments="-p 1883 --open")
+    brokers = []
+    for host in nm.all_hosts():
+        if nm[host]["tcp"][1883]["state"] == "open":
+            brokers.append(host)
+    return brokers[0] if brokers else ""
+
+
+def broker_id(mac, token):
+    params = {"mac": mac}
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+    response = requests.get(broker_url, params=params, headers=headers)
+    res = response.json()
+    broker_id = res["broker_id"]
+    broker_name = res["broker_id"]
+    return broker_id, broker_name
 
 
 def skip(login_window, root):
@@ -37,9 +66,10 @@ def login(username, password, login_window, root):
         messagebox.showerror("Error", f"Failed to login: {e}")
 
 
-def submit(name, password, mac, type, result_label, broker_addr):
-    global dev_name, dev_password
-    dev_name, dev_password = name, password
+def submit(name, password, mac, type, result_label, broker_ip):
+    global dev_name, dev_password, broker_addr, broker_name
+    dev_name, dev_password, broker_addr = name, password, broker_ip
+    broker_id, broker_name = broker_id(get_mac(broker_ip), token)
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",
@@ -49,7 +79,7 @@ def submit(name, password, mac, type, result_label, broker_addr):
         "password": password,
         "mac": mac,
         "type": type,
-        "broker_id": broker_id(broker_mac, token),
+        "broker_id": broker_id,
     }
     try:
         response = requests.post(dev_reg_url, json=data, headers=headers)
@@ -67,6 +97,8 @@ def submit(name, password, mac, type, result_label, broker_addr):
 
 
 def config_interface():
+    print("configuring the robot...")
+    broker_ip = scan_for_mqtt_brokers()
     login_window = tk.Tk()
     login_window.title("Login")
 
@@ -157,11 +189,12 @@ def config_interface():
     root.mainloop()
 
     if skipped:
-        data = {"broker_addr": broker_ip}
+        data = {"BROKER_ADDR": broker_ip}
     else:
         data = {
-            "name": dev_name,
-            "password": dev_password,
-            "broker_addr": broker_ip,
+            "NAME": dev_name,
+            "PASSWORD": dev_password,
+            "BROKER_ADDR": broker_ip,
+            "BROKER_NAME": broker_name,
         }
     return skipped, data
