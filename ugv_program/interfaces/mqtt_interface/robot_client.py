@@ -42,7 +42,6 @@ class RobotMQTTClient:
                 except Exception as e:
                     time.sleep(60)
 
-        # TO-DO:
         def on_message(client, userdata, msg):
             topic = msg.topic
             data_str = msg.payload.decode("utf-8")
