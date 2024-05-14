@@ -7,8 +7,8 @@ import nmap
 from config import env_get
 
 token = dev_name = dev_password = None
-login_url = f"{env_get("FLASK_URL")}/api/users/login"
-dev_reg_url = f"{env_get("FLASK_URL")}/api/devices"
+login_url = f"{env_get('FLASK_URL')}/api/users/login"
+dev_reg_url = f"{env_get('FLASK_URL')}/api/devices"
 subnet = env_get("SUBNET")
 skipped = False
 broker_type = 5
