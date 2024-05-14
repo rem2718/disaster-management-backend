@@ -5,10 +5,10 @@ load_dotenv()
 
 
 def env_get(var):
-    os.getenv(var)
+    return os.getenv(var)
 
 
 def env_update(values):
-    for var, val in values.iteritems():
+    for var, val in values.items():
         set_key(".env", var, val)
     load_dotenv()

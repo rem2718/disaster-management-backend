@@ -11,14 +11,14 @@ from mosq_funcs import *
 
 
 connected = False
-buffer = Buffer(env_get("BUFFER_PATH"), env_get("QUEUE_LIMIT"))
+buffer = Buffer(env_get("BUFFER_PATH"), int(env_get("QUEUE_LIMIT")))
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
     global connected
     if rc == 0:
         print(f"Connected to {client._port}")
-        if client._port == env_get("CLOUD_PORT"):
+        if client._port == int(env_get("CLOUD_PORT")):
             connected = True
     else:
         print("Connection to MQTT broker failed. Retrying in 60 seconds...")
@@ -87,17 +87,20 @@ try:
     cloud_client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 
     cloud_client.username_pw_set(env_get("CLOUD_NAME"), env_get("CLOUD_PASSWORD"))
-    local_client.username_pw_set(env_get("LOCAL_NAME"), env_get("LOCAL_NAME"))
+    local_client.username_pw_set(env_get("LOCAL_NAME"), env_get("LOCAL_PASSWORD"))
 
-    cloud_client.connect(env_get("CLOUD_ADDRESS"), env_get("CLOUD_PORT"))
-    local_client.connect(env_get("LOCAL_ADDRESS"), env_get("LOCAL_PORT"))
+    cloud_client.connect(env_get("CLOUD_ADDRESS"), int(env_get("CLOUD_PORT")))
+    local_client.connect(env_get("LOCAL_ADDRESS"), int(env_get("LOCAL_PORT")))
 
     local_client.loop_start()
     cloud_client.loop_start()
 
-    local_client.subscribe("#", qos=1)
-    cloud_client.subscribe(f"cloud/admin/{env_get('CLOUD_NAME')}/#", qos=1)
-    cloud_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/#", qos=1)
+    local_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/sensor-data", qos=1)
+    local_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/gps", qos=1)
+    local_client.subscribe(f"local/admin/{env_get('CLOUD_NAME')}/create-user", qos=1)
+    cloud_client.subscribe(f"cloud/admin/{env_get('CLOUD_NAME')}/+/dev", qos=1)
+    cloud_client.subscribe(f"cloud/admin/{env_get('CLOUD_NAME')}/+/mission", qos=1)
+    cloud_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/control", qos=1)
 
     while True:
         if connected:

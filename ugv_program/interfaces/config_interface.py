@@ -7,9 +7,9 @@ import nmap
 from config import env_get
 
 token = dev_name = dev_password = broker_addr = broker_name = None
-login_url = f"{env_get("FLASK_URL")}/api/users/login"
-dev_reg_url = f"{env_get("FLASK_URL")}/api/devices"
-broker_url = f"{env_get("FLASK_URL")}/api/devices/broker_id"
+login_url = f"{env_get('FLASK_URL')}/api/users/login"
+dev_reg_url = f"{env_get('FLASK_URL')}/api/devices"
+broker_url = f"{env_get('FLASK_URL')}/api/devices/broker_id"
 device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION"]
 subnet = env_get("SUBNET")
 skipped = False
