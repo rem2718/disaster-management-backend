@@ -22,8 +22,9 @@ class RobotMQTTClient:
         def on_connect(client, userdata, flags, rc, properties=None):
             if rc == 0:
                 print(f"Connected to {client._port}")
-                client.subscribe(f"cloud/reg/{broker_name}/{name}/#", qos=1)
-                client.subscribe(f"cloud/reg/{broker_name}/all/#", qos=1)
+                client.subscribe(f"cloud/reg/{broker_name}/{name}/control", qos=1)
+                client.subscribe(f"cloud/admin/{broker_name}/{name}/dev", qos=1)
+                client.subscribe(f"cloud/admin/{broker_name}/all/mission", qos=1)
                 # TO-DO: sub to local topic if you have any
             else:
                 print("Connection to MQTT broker failed. Retrying in 60 seconds...")
@@ -70,17 +71,7 @@ class RobotMQTTClient:
             print("Unable to publish, try again")
             # TO-DO: here you can apply buffering mechanisms
 
-    def update_creds(self, data):
-        self.name = data["name"]
-        self.password = data["password"]
-
-        if self.client.is_connected():
-            self.client.loop_stop()
-            self.client.disconnect()
-        self.client.username_pw_set(username=self.name, password=self.password)
-        self.client.connect(self.ip_addr, PORT, keepalive=60 * 30)
-        self.client.loop_start()
-
-    def stop(self):
+    def stop_client(self):
         print("Disconnecting from MQTT broker")
         self.client.loop_stop()
+        self.client.disconnect()

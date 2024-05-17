@@ -1,6 +1,6 @@
 # Collection of Code Files for Different Components of the Disaster Management System
 
-in linux always use python3
+in linux always use python3, pip3
 ## HiveMQ Broker
 
 

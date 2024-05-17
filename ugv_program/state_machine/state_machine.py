@@ -74,12 +74,14 @@ class RobotStateMachine:
 
     def init_robot(self):
         skipped, data = config_interface()
-        broker_addr = data["BROKER_ADDR"]
-        print(f"a MQTT broker has detected with IP address {broker_addr}")
+        self.broker_addr = data["BROKER_ADDR"]
+        print(f"a MQTT broker has detected with IP address {self.broker_addr}")
         env_update(data)
         if not skipped:
-            create_mqtt_user(broker_addr, data["NAME"], data["PASSWORD"])
-
+            create_mqtt_user(self.broker_addr, data["NAME"], data["PASSWORD"])
+        if env_get("NAME") == "" or env_get("PASSWORD") == "":
+            print("No robot has been configured before. please try again...")
+            sys.exit()
         self.name = env_get("NAME")
         self.password = env_get("PASSWORD")
         self.broker_name = env_get("BROKER_NAME")
@@ -87,22 +89,31 @@ class RobotStateMachine:
             self.name,
             self.password,
             self.broker_name,
-            broker_addr,
+            self.broker_addr,
             motion_queue,
             admin_queue,
         )
 
     def update_robot(self, data):
         env_update(data)
-        self.mqtt_client.update_creds(data)
+        self.name = data["NAME"]
+        self.password = data["PASSWORD"]
+        self.mqtt_client.stop_client()
+        self.mqtt_client = RobotMQTTClient(
+            self.name,
+            self.password,
+            self.broker_name,
+            self.broker_addr,
+            motion_queue,
+            admin_queue,
+        )
+
         # TO-DO: restart rtmp
         pass
 
     def delete_robot(self):
-        self.mqtt_client.stop()
-        env_update(
-            {"NAME": None, "PASSWORD": None, "BROKER_ADDR": None, "BROKER_NAME": None}
-        )
+        self.mqtt_client.stop_client()
+        env_update({"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""})
         print("Robot is deactivating...")
         sys.exit()
         # TO-DO: stop rtmp

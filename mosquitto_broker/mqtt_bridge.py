@@ -5,8 +5,8 @@ import paho.mqtt.client as paho
 from paho import mqtt
 
 from config_interface import config_interface
-from buffer.buffer import Buffer
 from config import env_get, env_update
+from buffer.buffer import Buffer
 from mosq_funcs import *
 
 
@@ -55,6 +55,7 @@ def cloud_on_message(client, userdata, msg):
         elif data["command"] == "delete":
             delete_mosquitto_user(robot)
     local_client.publish(msg.topic, payload=json.dumps(data), qos=1)
+    print(f"Published message")
 
 
 def local_on_message(client, userdata, msg):
