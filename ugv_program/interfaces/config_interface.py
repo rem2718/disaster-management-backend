@@ -30,7 +30,7 @@ def scan_for_mqtt_brokers():
     return brokers[0] if brokers else ""
 
 
-def broker_id(mac, token):
+def get_broker_id(mac, token):
     params = {"mac": mac}
     headers = {
         "Authorization": f"Bearer {token}",
@@ -69,7 +69,7 @@ def login(username, password, login_window, root):
 def submit(name, password, mac, type, result_label, broker_ip):
     global dev_name, dev_password, broker_addr, broker_name
     dev_name, dev_password, broker_addr = name, password, broker_ip
-    broker_id, broker_name = broker_id(get_mac(broker_ip), token)
+    broker_id, broker_name = get_broker_id(get_mac(broker_ip), token)
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",

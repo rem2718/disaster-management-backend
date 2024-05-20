@@ -6,10 +6,11 @@ from interfaces.hw_interface.sensors import read_sensor_data, get_gps
 from interfaces.mqtt_interface.robot_client import RobotMQTTClient
 from interfaces.config_interface import config_interface
 from state_machine.enums import RobotState, RobotEvent
+from interfaces.rtmp_interface import RobotRTMPClient
 from interfaces.hw_interface.auto import auto_motion
 from interfaces.mqtt_interface.admin_client import *
-from state_machine.stack import Stack
 from config import env_get, env_update
+from state_machine.stack import Stack
 
 
 # run_rtmp(f"{Config.RTMP_URL}/{name}")
@@ -93,6 +94,9 @@ class RobotStateMachine:
             motion_queue,
             admin_queue,
         )
+        self.rtmp_client = RobotRTMPClient(
+            self.name, self.password, env_get("RTMP_URL"), 0
+        )
 
     def update_robot(self, data):
         env_update(data)
@@ -107,27 +111,29 @@ class RobotStateMachine:
             motion_queue,
             admin_queue,
         )
-
-        # TO-DO: restart rtmp
-        pass
+        self.rtmp_client.stop_client()
+        self.rtmp_client = RobotRTMPClient(
+            self.name, self.password, env_get("RTMP_URL"), 0
+        )
 
     def delete_robot(self):
         self.mqtt_client.stop_client()
+        self.rtmp_client.stop_client()
         env_update({"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""})
         print("Robot is deactivating...")
         sys.exit()
-        # TO-DO: stop rtmp
 
     def idle_mode(self):
         global motion_queue
+        self.rtmp_client.stop_client()
         while True:
             self.check_admin_queue()
             if motion_queue:
                 motion_queue = []
             time.sleep(WAIT_TIME)
-        # TO-DO: stop rtmp
 
     def auto_mode(self):
+        self.rtmp_client.start_client()
         while True:
             self.check_admin_queue()
             data = read_sensor_data()
@@ -140,9 +146,9 @@ class RobotStateMachine:
                 self.mqtt_client.publish(topic, data)
             auto_motion()
             time.sleep(WAIT_TIME)
-        # TO-DO: rtmp
 
     def control_mode(self):
+        self.rtmp_client.start_client()
         while True:
             self.check_admin_queue()
             self.check_motion_queue()
@@ -155,7 +161,6 @@ class RobotStateMachine:
                 topic = f"cloud/reg/{self.broker_name}/{self.name}/gps"
                 self.mqtt_client.publish(topic, data)
             time.sleep(WAIT_TIME)
-        # TO-DO: rtmp
 
     def check_admin_queue(self):
         elem = admin_queue.pop(0) if admin_queue else None
