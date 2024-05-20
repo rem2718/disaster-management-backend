@@ -124,8 +124,8 @@ class RobotStateMachine:
                 {"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""}
             )
             print("Robot is deactivating...")
-        self.mqtt_client.stop_client()
         self.rtmp_client.stop_client()
+        self.mqtt_client.stop_client()
         sys.exit()
 
     def idle_mode(self):
