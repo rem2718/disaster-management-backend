@@ -39,7 +39,7 @@ def get_broker_id(mac, token):
     response = requests.get(broker_url, params=params, headers=headers)
     res = response.json()
     broker_id = res["broker_id"]
-    broker_name = res["broker_id"]
+    broker_name = res["broker_name"]
     return broker_id, broker_name
 
 
