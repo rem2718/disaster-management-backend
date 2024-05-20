@@ -8,6 +8,7 @@ import cv2
 class RobotRTMPClient:
     def __init__(self, name, password, link, device_index):
         self.link = f"{link}{name}?username={name}&password={password}"
+        print(self.link)
         self.index = device_index
         self.running = False
 
@@ -90,7 +91,8 @@ class RobotRTMPClient:
         self.preprocessing_thread.start()
 
     def stop_client(self):
-        if not self.running: return 
+        if not self.running:
+            return
         self.running = False
         self.preprocessing_thread.join()
         self.process.stdin.close()
