@@ -1,7 +1,8 @@
 from state_machine.state_machine import RobotStateMachine
-robot = None
+
+robot = RobotStateMachine()
 try:
-    robot = RobotStateMachine()
+    robot.start()
 except KeyboardInterrupt:
     robot.mqtt_client.stop_client()
     robot.rtmp_client.stop_client()

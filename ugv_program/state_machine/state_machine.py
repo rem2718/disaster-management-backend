@@ -24,6 +24,8 @@ class RobotStateMachine:
 
     def __init__(self):
         self.states = Stack(3)
+
+    def start(self):
         self.transition(RobotEvent.START_INIT)
 
     def state_setter(self, value):

@@ -36,10 +36,10 @@ cloud_client.loop_start()
 cloud_client.connect("27c434d04ed54e43a4c65102e26353b8.s1.eu.hivemq.cloud", 8883)
 # cloud_client.connect("192.168.68.125", 1883)
 
-topic = "cloud/admin/test-broker/all/mission"
+topic = "cloud/admin/test-broker/test-ugv/dev"
 # topic = "cloud/admin/test-broker/test-ugv/dev"
 
-data = {"command": "start", "username": "test-ugv", "password": "test"}
+data = {"command": "update", "name": "test-ugv", "password": "Test-1234"}
 # data = {"username": "test-a", "password": "test"}
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 
