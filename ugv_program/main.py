@@ -4,6 +4,5 @@ robot = RobotStateMachine()
 try:
     robot.start()
 except KeyboardInterrupt:
-    robot.mqtt_client.stop_client()
-    robot.rtmp_client.stop_client()
+    robot.stop()
     print("Robot Program is terminating...")

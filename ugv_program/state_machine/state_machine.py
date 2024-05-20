@@ -28,6 +28,11 @@ class RobotStateMachine:
     def start(self):
         self.transition(RobotEvent.START_INIT)
 
+    def stop(self):
+        self.mqtt_client.stop_client()
+        self.rtmp_client.stop_client()
+        sys.exit()
+
     def state_setter(self, value):
         self.states.push(value)
         cur = self.states.cur().name if self.states.cur() else None
