@@ -39,7 +39,7 @@ cloud_client.connect("27c434d04ed54e43a4c65102e26353b8.s1.eu.hivemq.cloud", 8883
 topic = "cloud/admin/test-broker/test-ugv/dev"
 # topic = "cloud/admin/test-broker/test-ugv/dev"
 
-data = {"command": "update", "name": "test-ugv", "password": "Test-123"}
+data = {"command": "start", "name": "test-ugv", "password": "Test-123"}
 # data = {"username": "test-a", "password": "test"}
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 

@@ -94,7 +94,7 @@ class RobotRTMPClient:
         if not self.running:
             return
         self.running = False
-        self.preprocessing_thread.join()
         self.process.stdin.close()
         self.process.terminate()
         self.process.wait()
+        self.preprocessing_thread.join()
