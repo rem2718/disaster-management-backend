@@ -22,16 +22,16 @@ def on_message(client, userdata, msg):
     print(msg.topic, data)
 
 
-cloud_client = paho.Client(client_id="clou-test", userdata=None)
+cloud_client = paho.Client(client_id="admin-broker", userdata=None)
 cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
 cloud_client.username_pw_set("admin-broker", "BroAdmin@1984")
 
-cloud_client.loop_start()
 cloud_client.connect("192.168.68.125", 1883)
+cloud_client.loop_start()
 
 topic = "cloud/reg/test-broker/test-ugv/sensor-data"
-cloud_client.subscribe(topic)
+cloud_client.subscribe(topic, qos=1)
 while True:
     pass
