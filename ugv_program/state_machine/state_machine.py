@@ -13,8 +13,6 @@ from config import env_get, env_update
 from state_machine.stack import Stack
 
 
-# run_rtmp(f"{Config.RTMP_URL}/{name}")
-
 motion_queue = []
 admin_queue = []
 WAIT_TIME = 0.0001
@@ -29,9 +27,7 @@ class RobotStateMachine:
         self.transition(RobotEvent.START_INIT)
 
     def stop(self):
-        self.mqtt_client.stop_client()
-        self.rtmp_client.stop_client()
-        sys.exit()
+        self.transition(RobotEvent.DELETE, {"deactivate": False})
 
     def state_setter(self, value):
         self.states.push(value)
@@ -67,7 +63,7 @@ class RobotStateMachine:
             self.transition(RobotEvent.BACK)
         elif event == RobotEvent.DELETE:
             self.state_setter(RobotState.INACTIVE)
-            self.delete_robot()
+            self.delete_robot(data)
         elif event == RobotEvent.BACK:
             prev = self.states.back()
             if prev == RobotState.IDLE:
@@ -122,11 +118,14 @@ class RobotStateMachine:
             self.name, self.password, env_get("RTMP_URL"), 0
         )
 
-    def delete_robot(self):
+    def delete_robot(self, data):
+        if data["deactivate"]:
+            env_update(
+                {"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""}
+            )
+            print("Robot is deactivating...")
         self.mqtt_client.stop_client()
         self.rtmp_client.stop_client()
-        env_update({"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""})
-        print("Robot is deactivating...")
         sys.exit()
 
     def idle_mode(self):
@@ -186,7 +185,8 @@ class RobotStateMachine:
             new_data = {"NAME": data["name"], "PASSWORD": data["password"]}
             self.transition(RobotEvent.UPDATE, new_data)
         elif command == "delete":
-            self.transition(RobotEvent.DELETE)
+            new_data = {"deactivate": True}
+            self.transition(RobotEvent.DELETE, new_data)
         elif command == "auto":
             if self.states.cur() == RobotState.CONTROLLED:
                 self.transition(RobotEvent.AUTO)

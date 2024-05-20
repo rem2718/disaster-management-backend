@@ -4,5 +4,5 @@ robot = RobotStateMachine()
 try:
     robot.start()
 except KeyboardInterrupt:
-    robot.stop()
     print("Robot Program is terminating...")
+    robot.stop()
