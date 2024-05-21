@@ -1,0 +1,1859 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Access API",
+        "description": "API endpoints for UGV-Based Disaster Management System",
+        "version": "1.0"
+    },
+    "basePath": "/",
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "JWT Bearer token"
+        }
+    },
+    "paths": {
+        "/api/users/signup": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Signup",
+                "description": "Register a new user\n\npassword conditions:\n-contains at least 8 characters\n-contains at least one uppercase letter, one lowercase letter, one digit, and one special character\n\nnote: email and username must be unique",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "User data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "user@example.com",
+                                    "required": true
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "Password@123",
+                                    "required": true
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "user123",
+                                    "required": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User created successfully. Once you receive approval from the admin, you can access your account and establish a connection with the Cloud MQTT broker using the same credentials."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/login": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Login",
+                "description": "Login with email or username and password",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "User data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email_or_username": {
+                                    "type": "string",
+                                    "example": "user@example.com",
+                                    "required": true
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "New_password123",
+                                    "required": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User logged in successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User layla21 loggedin successfully."
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "layla21"
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1
+                                },
+                                "token": {
+                                    "type": "string",
+                                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjA1NWEwYWU4MGU5MGUwODY0MWUyMmVmIiwiaWF0IjoxNjYxNDM3NTQzLCJleHAiOjE2NjE0NDEyNDN9.T6PlvZxId2GJWnT5SyZgnkr0-pUgBp9_1l1dUKhxO54"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid email or password"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/rtmp_auth": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Authentication Proxy for RTMP Server",
+                "description": "Login with username and password for RTMP Server",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "username",
+                        "type": "string",
+                        "required": true,
+                        "default": "user123"
+                    },
+                    {
+                        "in": "query",
+                        "name": "password",
+                        "type": "string",
+                        "required": true,
+                        "default": "New_password123"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User logged in successfully"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid email or password"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/users/logout": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Logout",
+                "description": "Logout the user",
+                "responses": {
+                    "200": {
+                        "description": "User logged out successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User logged out successfully."
+                                },
+                                "token": {
+                                    "type": "string",
+                                    "example": ""
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid token"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Info Retrievement",
+                "description": "Get User Information",
+                "responses": {
+                    "200": {
+                        "description": "JSON object of user information",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "user_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae80e90e08641e22ef"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "email@example.com"
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "Username1"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid token"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Info Update",
+                "description": "Update user's username or email",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "User data",
+                        "required": false,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "username": {
+                                    "type": "string",
+                                    "example": "new_username"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "new_email@example.com"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User information updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User information is updated successfully."
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "email@example.com"
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "Username1"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "409": {
+                        "description": "Conflict - The username or email is already taken or identical to the current one"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user_id}": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Info Retrievement [ADMIN]",
+                "description": "Get User Information for Admin interface",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ID of the user to retrieve",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON object of user information",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "user_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae80e90e08641e22ef"
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "email@example.com"
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "Username1"
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1
+                                },
+                                "status": {
+                                    "type": "int",
+                                    "example": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid token"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Deletion [ADMIN]",
+                "description": "Delete User for Admin interface",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ID of the user to delete",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User is deleted successfully."
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "409": {
+                        "description": "Conflict - User is already Inactive."
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/all": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User List Retrievement [ADMIN]",
+                "description": "Get list of users with pagenation for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page-number",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Page number",
+                        "default": 1
+                    },
+                    {
+                        "in": "query",
+                        "name": "page-size",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Number of items per page",
+                        "default": 5
+                    },
+                    {
+                        "in": "query",
+                        "name": "username",
+                        "type": "string",
+                        "required": false,
+                        "description": "filter for username",
+                        "default": "user"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "description": "filter for user status",
+                        "type": "array",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "type": "array",
+                        "required": false,
+                        "description": "filter for user type",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "mission",
+                        "type": "string",
+                        "required": false,
+                        "description": "[mission_id] users for mission to include in the list"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "6055a0ae80e90e08641e22ef"
+                                    },
+                                    "username": {
+                                        "type": "string",
+                                        "example": "Layla"
+                                    },
+                                    "active_mission_count": {
+                                        "type": "int",
+                                        "example": 2
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/count": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Count [ADMIN]",
+                "description": "Get the count of users with filters for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "description": "filter for the user status",
+                        "type": "array",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "type": "array",
+                        "required": false,
+                        "description": "filter for the user type",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "array",
+                                    "example": []
+                                },
+                                "type": {
+                                    "type": "array",
+                                    "example": [
+                                        1,
+                                        2
+                                    ]
+                                },
+                                "count": {
+                                    "type": "int",
+                                    "example": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/cur_missions": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Current Missions Retrievement",
+                "description": "Retrieve all missions in which the user is currently participating actively\n\nMission Statuses(enum):\n1: CREATED\n2: ONGOING\n3: PAUSED",
+                "responses": {
+                    "200": {
+                        "description": "List of all the current missions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "_id": {
+                                        "type": "string",
+                                        "example": "6055a0ae80e90e08641e22ef"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "MissionABC"
+                                    },
+                                    "status": {
+                                        "type": "int",
+                                        "example": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/{user_id}/approval": {
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Account Approval [ADMIN]",
+                "description": "approve the user account and specify their type",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ID of the user to delete",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Approval data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "approved": {
+                                    "type": "boolean",
+                                    "example": true,
+                                    "required": true
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1,
+                                    "required": false
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User account status updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User account status is updated successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/users/password": {
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Password Update",
+                "description": "Update user's password",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "User data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "old_password": {
+                                    "type": "string",
+                                    "example": "Old_password123",
+                                    "required": true
+                                },
+                                "new_password": {
+                                    "type": "string",
+                                    "example": "New_password123",
+                                    "required": true
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Password updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Password is updated successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - No password provided or new password is identical to the current one"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Incorrect old password"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/devices": {
+            "post": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Registration [ADMIN - ROBOT]",
+                "description": "Register a new device\nName and MAC Address must be unique.\nThis endpoint is called from the device itself, not the mobile app.",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Device data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Device1",
+                                    "required": true
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "Password@123",
+                                    "required": true
+                                },
+                                "mac": {
+                                    "type": "string",
+                                    "example": "00:0a:95:9d:68:16",
+                                    "required": true
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1
+                                },
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef",
+                                    "required": false
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Device registered successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Device registered successfully."
+                                },
+                                "device_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized Error - Admin access is required"
+                    },
+                    "409": {
+                        "description": "Conflict - A device with the same MAC address is already registered"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/devices/rtmp_auth": {
+            "get": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Authentication Proxy for RTMP Server",
+                "description": "Login with name and password for RTMP Server",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "type": "string",
+                        "required": true,
+                        "default": "user123"
+                    },
+                    {
+                        "in": "query",
+                        "name": "password",
+                        "type": "string",
+                        "required": true,
+                        "default": "New_password123"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Device logged in successfully"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid email or password"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/api/devices/{device_id}": {
+            "get": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Info Retrievement [ADMIN]",
+                "description": "Get Device Information for Admin interface",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "ID of the device to retrieve",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON object of device information",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "device_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae80e90e08641e22ef"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Robot1"
+                                },
+                                "mac": {
+                                    "type": "string",
+                                    "example": "00:0a:95:9d:68:16"
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1
+                                },
+                                "status": {
+                                    "type": "int",
+                                    "example": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid token"
+                    },
+                    "404": {
+                        "description": "Not Found - Device not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Info Update [ADMIN]",
+                "description": "update name, or password for the Device\n\nDevice Types:\n1: UGV\n2: UAV\n3: DOG\n4: CHARGING_STATION\n 5: BROKER",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "ID of the device to update",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Device data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "new_name"
+                                },
+                                "old_password": {
+                                    "type": "string",
+                                    "example": "Old_password123"
+                                },
+                                "new_password": {
+                                    "type": "string",
+                                    "example": "New_password123"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Device information is updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Device information is updated successfully."
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Robot1"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized Error - Admin access is required"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "Not Found - Device not found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Deactivation [ADMIN]",
+                "description": "Deactivate a device",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "ID of the device to deactivate",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Device is deactivated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Device is deactivated successfully."
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized Error - Admin access is required"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "Not Found - Device not found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/devices/all": {
+            "get": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device List Retrievement [ADMIN]",
+                "description": "Get list of devices with pagenation for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page-number",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Page number",
+                        "default": 1
+                    },
+                    {
+                        "in": "query",
+                        "name": "page-size",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Number of items per page",
+                        "default": 5
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "type": "string",
+                        "required": false,
+                        "description": "filter for device name",
+                        "default": "device"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "array",
+                        "required": false,
+                        "description": "filter for device status",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "type": "array",
+                        "required": false,
+                        "description": "filter for device type",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "mission",
+                        "type": "string",
+                        "required": false,
+                        "description": "[mission_id] devices for mission to include in the list"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "6055a0ae80e90e08641e22ef"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Robot1"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/devices/count": {
+            "get": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Count [ADMIN]",
+                "description": "Get the count of devices with filters for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "description": "filter for the user status",
+                        "type": "array",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "type": "array",
+                        "required": false,
+                        "description": "filter for the user type",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "array",
+                                    "example": []
+                                },
+                                "type": {
+                                    "type": "array",
+                                    "example": [
+                                        1,
+                                        2
+                                    ]
+                                },
+                                "count": {
+                                    "type": "int",
+                                    "example": 10
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/devices/broker_id": {
+            "get": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Broker ID [ADMIN - ROBOT]",
+                "description": "Get the broker id by using its mac address",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "mac",
+                        "required": true,
+                        "description": "mac of the broker",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/missions": {
+            "post": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission Creation [ADMIN]",
+                "description": "Create a new mission with the provided details",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Mission data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Mission ABC",
+                                    "required": true
+                                },
+                                "device_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f268f122c3647c263a1a79"
+                                    }
+                                },
+                                "user_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f64a53767178df500184ec"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Mission created successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Mission created successfully."
+                                },
+                                "mission_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae80e90e08641e22ef"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized Error - Admin access is required"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "Not Found - Device/User not found"
+                    },
+                    "409": {
+                        "description": "Conflict - Mission name is already taken"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/missions/{mission_id}": {
+            "get": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission Information Retrievement",
+                "description": "Retrieve information about a specific mission",
+                "parameters": [
+                    {
+                        "name": "mission_id",
+                        "in": "path",
+                        "description": "ID of the mission to retrieve",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mission information retrieved successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "example": "6055a0ae80e90e08641e22ef"
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Mission ABC"
+                                },
+                                "start_date": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2024-03-14 06:06:28.018762"
+                                },
+                                "end_date": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2024-03-16 06:06:28.018762"
+                                },
+                                "status": {
+                                    "type": "int",
+                                    "example": 1
+                                },
+                                "devices": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "example": "6055a0ae80e90e08641e22ef"
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Device1"
+                                            },
+                                            "type": {
+                                                "type": "int",
+                                                "example": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Mission not found"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission Info Update [ADMIN]",
+                "description": "update name, device_ids, user_ids, start_date or end_date for the Mission",
+                "parameters": [
+                    {
+                        "name": "mission_id",
+                        "in": "path",
+                        "description": "ID of the mission to update",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Mission data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "Mission ABC",
+                                    "required": true
+                                },
+                                "device_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f268f122c3647c263a1a79"
+                                    }
+                                },
+                                "user_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f64a53767178df500184ec"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mission information is updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Mission information is updated successfully."
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "Mission ABC"
+                                },
+                                "device_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f268f122c3647c263a1a79"
+                                    }
+                                },
+                                "user_ids": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "example": "65f64a53767178df500184ec"
+                                    }
+                                },
+                                "start_date": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2020-02-01T10:11:30"
+                                },
+                                "end_date": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2020-02-04T06:00:34"
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Bad Request"
+                        },
+                        "401": {
+                            "description": "Unauthorized Error - Admin access is required"
+                        },
+                        "403": {
+                            "description": "Forbidden Error"
+                        },
+                        "404": {
+                            "description": "Not Found - Mission not found"
+                        },
+                        "409": {
+                            "description": "Conflict"
+                        },
+                        "500": {
+                            "description": "Internal Server Error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/missions/all": {
+            "get": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission List Retrievement [ADMIN]",
+                "description": "Get list of missions with pagenation for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page-number",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Page number",
+                        "default": 1
+                    },
+                    {
+                        "in": "query",
+                        "name": "page-size",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Number of items per page",
+                        "default": 5
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "type": "string",
+                        "required": false,
+                        "description": "filter for mission name",
+                        "default": "mission"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "integer",
+                        "required": false,
+                        "description": "filter for mission status",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "6055a0ae80e90e08641e22ef"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "mission A"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/missions/count": {
+            "get": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission Count [ADMIN]",
+                "description": "Get the count of mission with filters for Admin interface",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "required": false,
+                        "description": "filter for the user status",
+                        "type": "array",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "array",
+                                    "example": [
+                                        1,
+                                        3
+                                    ]
+                                },
+                                "count": {
+                                    "type": "int",
+                                    "example": 1
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request parameters"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/missions/{mission_id}/{command}": {
+            "put": {
+                "tags": [
+                    "Mission Management"
+                ],
+                "summary": "Mission Status Update [ADMIN]",
+                "description": "update status for the Mission\n\nCommands:\n-start\n-pause\n-continue\n-cancel\n-end",
+                "parameters": [
+                    {
+                        "name": "mission_id",
+                        "in": "path",
+                        "description": "ID of the mission to update",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    },
+                    {
+                        "name": "command",
+                        "in": "path",
+                        "description": "command for the mission to update the status",
+                        "required": true,
+                        "type": "string",
+                        "example": "start"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mission information is updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "Mission status is updated successfully."
+                                }
+                            }
+                        },
+                        "400": {
+                            "description": "Bad Request"
+                        },
+                        "401": {
+                            "description": "Unauthorized Error - Admin access is required"
+                        },
+                        "403": {
+                            "description": "Forbidden Error"
+                        },
+                        "404": {
+                            "description": "Not Found - Mission not found"
+                        },
+                        "409": {
+                            "description": "Conflict"
+                        },
+                        "500": {
+                            "description": "Internal Server Error"
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        }
+    }
+}
