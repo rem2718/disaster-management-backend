@@ -61,7 +61,7 @@ def cloud_on_message(client, userdata, msg):
 def local_on_message(client, userdata, msg):
     data_str = msg.payload.decode("utf-8")
     data = json.loads(data_str)
-    if msg.topic == f"local/admin/{env_get('CLOUD_NAME')}/create-user":
+    if msg.topic == f"local/admin/{env_get('CLOUD_NAME')}/user":
         create_mosquitto_user(data["username"], data["password"])
     elif msg.topic.startswith("cloud/reg/"):
         if connected and buffer.queue_empty() and buffer.file_empty():
@@ -98,7 +98,7 @@ try:
 
     local_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/sensor-data", qos=1)
     local_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/gps", qos=1)
-    local_client.subscribe(f"local/admin/{env_get('CLOUD_NAME')}/create-user", qos=1)
+    local_client.subscribe(f"local/admin/{env_get('CLOUD_NAME')}/user", qos=1)
     cloud_client.subscribe(f"cloud/admin/{env_get('CLOUD_NAME')}/+/dev", qos=1)
     cloud_client.subscribe(f"cloud/admin/{env_get('CLOUD_NAME')}/+/mission", qos=1)
     cloud_client.subscribe(f"cloud/reg/{env_get('CLOUD_NAME')}/+/control", qos=1)

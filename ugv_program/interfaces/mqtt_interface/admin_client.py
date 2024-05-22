@@ -8,7 +8,7 @@ admin_user = env_get("BROKER_ADMIN_NAME")
 admin_password = env_get("BROKER_ADMIN_PASS")
 
 PORT = 1883
-CREATE_TOPIC = f"local/admin/{env_get('BROKER_NAME')}/create-user"
+CREATE_TOPIC = f"local/admin/{env_get('BROKER_NAME')}/user"
 
 
 def on_connect(client, userdata, flags, rc, properties=None):
