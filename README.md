@@ -50,6 +50,7 @@ sudo apt-get install -y mosquitto mosquitto-clients
     sudo apt-get install -y ffmpeg
     sudo apt-get install -y nmap
 ```
+- _.env_ file will be given to you
 - open the terminal on the same directory
 - create venv, activate it and install all reqs
 ```
