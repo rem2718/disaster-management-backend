@@ -5,8 +5,16 @@ services:
     build:
       context: ./flask
       dockerfile: Dockerfile
+    networks:
+      - backend-network
+
+  mosquitto_server:
+    container_name: mosquitto_server
+    build:
+      context: ./mosquitto
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "1883:1883"
     networks:
       - backend-network
 

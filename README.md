@@ -1,10 +1,23 @@
-# Collection of Code Files for Different Components of the Disaster Management System
+# All my Work for Different Components of the Disaster Management System
 
-in linux always use python3, pip3
-## HiveMQ Broker
+## BACKEND
+check the [documentation](https://docs.google.com/document/d/1gS4TmuDZGWw6IP3S2O6vt80A9_Mr-PaPovwCOnXrAaM) for more info
+
+to run the backend:
+- first clone this repo 
+- install docker if you dont have it already.
+- then create _.env_ file inside _flask/app_ directory
+- fill _.env_ with the content of this [file](https://drive.google.com/file/d/1C97KQtfIIS75cXcdN4TfpVWwiihHWhpn/view?usp=sharing)
+- open terminal inside this directory
+- run this command
+```
+    docker-compose -p disaster-management up --build
+```
+
+and voila! You have the whole backend running: a web server (Flask), an MQTT server (Mosquitto), an RTMP server, and Nginx.
 
 
-## Mosquitto Broker
+## BROKER PROGRAM
 - The Mosquitto broker should be hosted on a device that is on the same LAN as the other robots.
 - First, you should install Mosquitto, and then copy and paste the configuration file **mosquitto.conf** into your Mosquitto directory.
 - place **acl_file.conf** inside your Mosquitto directory.
@@ -16,13 +29,8 @@ in linux always use python3, pip3
 - Finally, you need to run **mqtt_bridge.py** to bridge all the cloud packets to the HiveMQ broker.
 
 
-## RTMP Server
-- The RTMP Server should be hosted on the cloud using Nginx, along with the web server. Please refer to this [link](https://github.com/rem2718/disaster-management) for the web server.
-
-- Ensure that you have Nginx installed first, and then copy and paste the configuration file **nginx.conf** into your Nginx configuration directory.
-
-- ffmpeg
+## UGV PROGRAM
 
 
-## UGV Codes
-
+## NOTES
+- in linux always use python3, pip3
