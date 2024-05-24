@@ -187,11 +187,13 @@ class RobotStateMachine:
         elif command == "delete":
             new_data = {"deactivate": True}
             self.transition(RobotEvent.DELETE, new_data)
-        elif command == "auto":
-            if self.states.cur() == RobotState.CONTROLLED:
+        elif command == "switch":
+            if data["state"] == "auto" and self.states.cur() == RobotState.CONTROLLED:
                 self.transition(RobotEvent.AUTO)
-        elif command == "control":
-            if self.states.cur() == RobotState.AUTONOMOUS:
+            elif (
+                data["state"] == "control"
+                and self.states.cur() == RobotState.AUTONOMOUS
+            ):
                 self.transition(RobotEvent.CONTROL)
         else:
             print("Invalid admin command")

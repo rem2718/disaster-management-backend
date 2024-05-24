@@ -5,8 +5,6 @@ import paho.mqtt.client as paho
 
 from config import env_get
 
-admin_user = env_get("BROKER_ADMIN_NAME")
-admin_password = env_get("BROKER_ADMIN_PASS")
 
 PORT = 1883
 

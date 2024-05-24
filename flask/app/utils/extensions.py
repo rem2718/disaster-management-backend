@@ -6,11 +6,15 @@ from flask_jwt_extended import JWTManager
 from flask_bcrypt import Bcrypt
 from flask import jsonify
 
+from app.utils.mqtt_interface import MQTTClient
 from app.utils.enums import UserType
+from app.config import Config
 
 db = MongoEngine()
 bcrypt = Bcrypt()
 jwt = JWTManager()
+mqtt_client = MQTTClient(Config.MQTT_NAME, Config.MQTT_PASS, Config.MQTT_URL)
+
 
 def err_res(code, data):
     match code:

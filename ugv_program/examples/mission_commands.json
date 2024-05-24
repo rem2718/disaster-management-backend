@@ -11,11 +11,16 @@
     {
         "command": "continue"
     },
+
+
+    
     {
-        "command": "auto"
+        "command": "switch",
+        "state": "auto"
     },
     {
-        "command": "control"
+        "command": "switch",
+        "state": "control"
     },
     {
         "command": "update",

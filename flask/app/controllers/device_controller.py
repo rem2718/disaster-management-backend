@@ -41,12 +41,10 @@ def register(user_type, name, password, mac, type, broker_id):
     else:
         device = Device(name=name, password=hashed_password, mac=mac, type=type)
 
-    device.save()
     if type == DeviceType.BROKER:
-        # TO-DO: create mqtt creds for the device
-        # create_mqtt_user(device.name, password)
-        pass
+        mqtt_client.create_mqtt_user(device.name, password)
 
+    device.save()
     data = {
         "message": "Device is registered successfully.",
         "device_id": str(device.id),
@@ -81,14 +79,29 @@ def get_info(user_type, device_id):
         "type": device.type,
         "status": device.status,
     }
+
+    if device.type != DeviceType.BROKER:
+        broker_name = Device.objects.get(id=device.broker_id.id).name
+        data["broker"] = {
+            "broker_id": str(device.broker_id.id),
+            "broker_name": broker_name,
+        }
+
+    if device.status == DeviceStatus.ASSIGNED:
+        mission = Mission.objects(device_ids=ObjectId(device_id)).first()
+        data["cur_mission"] = {
+            "mission_id": str(mission.id),
+            "name": mission.name,
+            "status": mission.status,
+        }
+
     return jsonify(data), 200
 
 
 @authorize_admin
 @handle_exceptions
 def get_all(user_type, page_number, page_size, name, statuses, types, mission_id):
-    offset = (page_number - 1) * page_size
-    query, data = {}, []
+    query, items = {}, []
 
     if name:
         query["name__icontains"] = name
@@ -97,7 +110,7 @@ def get_all(user_type, page_number, page_size, name, statuses, types, mission_id
         query["status__in"] = statuses
     if types:
         query["type__in"] = types
-    devices = Device.objects(**query).skip(offset).limit(page_size)
+    devices = Device.objects(**query).paginate(page=page_number, per_page=page_size)
 
     if mission_id:
         mission_devs = []
@@ -107,7 +120,7 @@ def get_all(user_type, page_number, page_size, name, statuses, types, mission_id
             device = Device.objects.get(id=str(dev.id))
             if types and device.type not in types:
                 continue
-            data.append(
+            items.append(
                 {
                     "id": str(device.id),
                     "name": device.name,
@@ -116,7 +129,7 @@ def get_all(user_type, page_number, page_size, name, statuses, types, mission_id
                     "in_mission": True,
                 }
             )
-        data += [
+        items += [
             {
                 "id": str(device.id),
                 "name": device.name,
@@ -124,19 +137,27 @@ def get_all(user_type, page_number, page_size, name, statuses, types, mission_id
                 "status": device.status,
                 "in_mission": False,
             }
-            for device in devices
+            for device in devices.items
             if str(device.id) not in mission_devs
         ]
     else:
-        data = [
+        items = [
             {
                 "id": str(device.id),
                 "name": device.name,
                 "type": device.type,
                 "status": device.status,
             }
-            for device in devices
+            for device in devices.items
         ]
+
+    data = {
+        "items": items,
+        "has_next": devices.has_next,
+        "has_prev": devices.has_prev,
+        "page": devices.page,
+        "total_pages": devices.pages,
+    }
 
     return jsonify(data), 200
 
@@ -208,9 +229,32 @@ def update(user_type, device_id, name, old_password, new_password):
     if device.type == DeviceType.BROKER:
         # TO-DO: update mqtt creds for the device (new_password)
         pass
+    else:
+        broker_name = Device.objects.get(id=device.broker_id).name
+        mqtt_data = {"command": "update", "name": device.name, "password": new_password}
+        mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
     data = {
         "message": "Device information is updated successfully.",
         "name": device.name,
+    }
+    return jsonify(data), 200
+
+
+@handle_exceptions
+def update_state(device_id, state):
+    device = Device.objects.get(id=device_id)
+    null_validator(["State"], [state])
+    if state not in ["control", "auto"]:
+        return err_res(400, "Invalid state.")
+
+    if device.type not in [DeviceType.UGV]:
+        return err_res(409, "You can't change the state of this device.")
+
+    broker_name = Device.objects.get(id=device.broker_id).name
+    mqtt_data = {"command": "switch", "state": state}
+    mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
+    data = {
+        "message": "Device state is updated successfully.",
     }
     return jsonify(data), 200
 
@@ -231,5 +275,12 @@ def deactivate(user_type, device_id):
         mission.update(pull__device_ids=ObjectId(device_id))
 
     Device.objects(id=device_id).update(set__status=DeviceStatus.INACTIVE)
-    # TO-DO: delete mqtt creds for that device
+    if device.type == DeviceType.BROKER:
+        # TO-DO: delete mqtt creds for that device
+        mqtt_client.delete_mqtt_user(device.name)
+        pass
+    else:
+        broker_name = Device.objects.get(id=device.broker_id).name
+        mqtt_data = {"command": "delete", "name": device.name}
+        mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
     return jsonify({"message": "Device is deactivated successfully."}), 200

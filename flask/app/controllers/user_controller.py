@@ -13,7 +13,8 @@ from app.utils.mqtt_interface import *
 MIN_LENGTH = 3
 MAX_LENGTH = 20
 
-# TO-DO: search for users, devices, missions
+# TO-DO: accepted user problem
+# TO-DO: gps problem
 
 
 @handle_exceptions
@@ -62,8 +63,7 @@ def login(email_or_username, password):
         return err_res(403, "Account is rejected. Please contact support.")
 
     if user.status == UserStatus.ACCEPTED:
-        # TO-DO: create mqtt creds for the user
-        # create_mqtt_user(user.username, password)
+        mqtt_client.create_mqtt_user(user.username, password)
         user.status = UserStatus.AVAILABLE
         user.save()
 
@@ -125,12 +125,21 @@ def get_info(user_id):
 def get_user_info(user_type, user_id):
     null_validator(["User ID"], [user_id])
     user = User.objects.get(id=user_id)
+    missions = [
+        {
+            "mission_id": str(mission._id),
+            "name": mission.name,
+            "status": mission.status.value,
+        }
+        for mission in user.cur_missions
+    ]
     data = {
         "user_id": str(user.id),
         "email": user.email,
         "username": user.username,
         "type": user.type,
         "status": user.status,
+        "cur_missions": missions,
     }
     return jsonify(data), 200
 
@@ -138,8 +147,7 @@ def get_user_info(user_type, user_id):
 @authorize_admin
 @handle_exceptions
 def get_all(user_type, page_number, page_size, username, statuses, types, mission_id):
-    offset = (page_number - 1) * page_size
-    query, data = {}, []
+    query, items = {}, []
 
     if username:
         query["username__icontains"] = username
@@ -148,7 +156,7 @@ def get_all(user_type, page_number, page_size, username, statuses, types, missio
         query["status__in"] = statuses
     if types:
         query["type__in"] = types
-    users = User.objects(**query).skip(offset).limit(page_size)
+    users = User.objects(**query).paginate(page=page_number, per_page=page_size)
 
     if mission_id:
         mission_users = []
@@ -156,7 +164,7 @@ def get_all(user_type, page_number, page_size, username, statuses, types, missio
         for usr in mission.user_ids:
             mission_users.append(str(usr.id))
             user = User.objects.get(id=str(usr.id))
-            data.append(
+            items.append(
                 {
                     "id": str(user.id),
                     "username": user.username,
@@ -167,7 +175,7 @@ def get_all(user_type, page_number, page_size, username, statuses, types, missio
                 }
             )
 
-        data += [
+        items += [
             {
                 "id": str(user.id),
                 "username": user.username,
@@ -176,11 +184,11 @@ def get_all(user_type, page_number, page_size, username, statuses, types, missio
                 "in_mission": False,
                 "active_mission_count": len(user.cur_missions),
             }
-            for user in users
+            for user in users.items
             if str(user.id) not in mission_users
         ]
     else:
-        data = [
+        items = [
             {
                 "id": str(user.id),
                 "username": user.username,
@@ -188,8 +196,16 @@ def get_all(user_type, page_number, page_size, username, statuses, types, missio
                 "status": user.status,
                 "active_mission_count": len(user.cur_missions),
             }
-            for user in users
+            for user in users.items
         ]
+
+    data = {
+        "items": items,
+        "has_next": users.has_next,
+        "has_prev": users.has_prev,
+        "page": users.page,
+        "total_pages": users.pages,
+    }
 
     return jsonify(data), 200
 
@@ -308,8 +324,10 @@ def update_password(user_id, old_password, new_password):
     password_validator(new_password)
 
     user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+    mqtt_client.delete_mqtt_user(user.username)
+    mqtt_client.create_mqtt_user(user.username, new_password)
     user.save()
-    # TO-DO: update mqtt creds for the user (password)
     return jsonify({"message": "Password is updated successfully."}), 200
 
 
@@ -326,6 +344,6 @@ def delete_user(user_type, user_id):
     User.objects(id=user_id).update(
         set__cur_missions=[], set__status=UserStatus.INACTIVE
     )
-    # TO-DO: delete mqtt creds for that user
-    # delete_mqtt_user(user.username)
+
+    mqtt_client.delete_mqtt_user(user.username)
     return jsonify({"message": "User is deleted successfully."}), 200

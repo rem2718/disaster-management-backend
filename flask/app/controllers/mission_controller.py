@@ -10,6 +10,9 @@ from app.models.device_model import Device
 from app.utils.validators import *
 from app.utils.extensions import *
 
+# TO-DO: mqtt mission
+# TO-DO: mission dup devices, users
+
 
 def update_cur_mission(mission, type):
     for usr in mission.user_ids:
@@ -114,7 +117,6 @@ def get_info(user_type, mission_id):
 @authorize_admin
 @handle_exceptions
 def get_all(user_type, page_number, page_size, name, statuses):
-    offset = (page_number - 1) * page_size
     query = {}
 
     if name:
@@ -122,11 +124,19 @@ def get_all(user_type, page_number, page_size, name, statuses):
     if statuses:
         query["status__in"] = statuses
 
-    missions = Mission.objects(**query).skip(offset).limit(page_size)
-    data = [
+    missions = Mission.objects(**query).paginate(page=page_number, per_page=page_size)
+    items = [
         {"id": str(mission.id), "name": mission.name, "status": mission.status.value}
-        for mission in missions
+        for mission in missions.items
     ]
+
+    data = {
+        "items": items,
+        "has_next": missions.has_next,
+        "has_prev": missions.has_prev,
+        "page": missions.page,
+        "total_pages": missions.pages,
+    }
     return jsonify(data), 200
 
 

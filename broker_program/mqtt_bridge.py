@@ -2,7 +2,6 @@ import json
 import time
 
 import paho.mqtt.client as paho
-from paho import mqtt
 
 from config_interface import config_interface
 from config import env_get, env_update
@@ -77,21 +76,26 @@ try:
         env_update({"CLOUD_NAME": data["name"], "CLOUD_PASSWORD": data["password"]})
 
     cloud_client = paho.Client(
-        client_id=env_get("CLOUD_NAME"), userdata=None, protocol=paho.MQTTv5
+        client_id=env_get("CLOUD_NAME"), userdata=None, clean_session=False
     )
-    local_client = paho.Client(client_id=env_get("LOCAL_NAME"), userdata=None)
+    local_client = paho.Client(
+        client_id=env_get("LOCAL_NAME"), userdata=None, clean_session=False
+    )
     cloud_client.on_connect = on_connect
     local_client.on_connect = on_connect
     local_client.on_message = local_on_message
     cloud_client.on_message = cloud_on_message
     cloud_client.on_disconnect = on_disconnect
-    cloud_client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
 
     cloud_client.username_pw_set(env_get("CLOUD_NAME"), env_get("CLOUD_PASSWORD"))
     local_client.username_pw_set(env_get("LOCAL_NAME"), env_get("LOCAL_PASSWORD"))
 
-    cloud_client.connect(env_get("CLOUD_ADDRESS"), int(env_get("CLOUD_PORT")))
-    local_client.connect(env_get("LOCAL_ADDRESS"), int(env_get("LOCAL_PORT")))
+    cloud_client.connect(
+        env_get("CLOUD_ADDRESS"), int(env_get("CLOUD_PORT")), keepalive=60 * 30
+    )
+    local_client.connect(
+        env_get("LOCAL_ADDRESS"), int(env_get("LOCAL_PORT")), keepalive=60 * 30
+    )
 
     local_client.loop_start()
     cloud_client.loop_start()

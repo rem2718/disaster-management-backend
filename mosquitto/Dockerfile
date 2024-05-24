@@ -13,4 +13,4 @@ RUN mosquitto_passwd -b /mosquitto/config/passwd admin-broker AdmBro@1984 && \
 
 EXPOSE 1883
 
-CMD ["sh", "-c", "/usr/local/bin/mosquitto_admin.sh"]
+# CMD ["sh", "-c", "/usr/local/bin/mosquitto_admin.sh"]

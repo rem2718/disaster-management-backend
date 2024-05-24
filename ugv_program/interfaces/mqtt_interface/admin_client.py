@@ -19,7 +19,7 @@ def on_message(client, userdata, msg):
     print(msg.topic + " " + str(msg.qos) + " " + str(msg.payload))
 
 
-admin_client = paho.Client(client_id=admin_user)
+admin_client = paho.Client(client_id=admin_user, clean_session=False)
 admin_client.username_pw_set(admin_user, admin_password)
 
 admin_client.on_connect = on_connect
@@ -28,7 +28,7 @@ admin_client.on_message = on_message
 
 def create_mqtt_user(addr, username, password):
     try:
-        admin_client.connect(addr, PORT)
+        admin_client.connect(addr, PORT, keepalive=60 * 30)
         data = {"username": username, "password": password}
         admin_client.publish(CREATE_TOPIC, payload=json.dumps(data), qos=1)
         admin_client.disconnect()

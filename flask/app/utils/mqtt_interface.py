@@ -1,13 +1,78 @@
-# from app.config import Config
+import json
+import time
+
+import paho.mqtt.client as paho
+
+PORT = 1883
 
 
-def _login():
-    pass
+class MQTTClient:
 
+    def __init__(self, name, password, ip_addr):
+        self.name = name
+        self.password = password
+        self.ip_addr = ip_addr
+        self.client = paho.Client(client_id=name, clean_session=False)
 
-def create_mqtt_user(username, password):
-    pass
+        def on_connect(client, userdata, flags, rc, properties=None):
+            if rc == 0:
+                print(f"Connected to {client._port}")
+            else:
+                print("Connection to MQTT broker failed. Retrying in 60 seconds...")
+                time.sleep(60)
+                client.reconnect()
 
+        def on_disconnect(client, userdata, rc, properties=None):
+            print("Disconnected from MQTT broker. Retrying in 60 seconds...")
+            while True:
+                try:
+                    rc = client.reconnect()
+                    if rc == 0:
+                        break
+                    else:
+                        time.sleep(60)
+                except Exception as e:
+                    time.sleep(60)
 
-def delete_mqtt_user(username):
-    pass
+        self.client.on_connect = on_connect
+        self.client.on_disconnect = on_disconnect
+        self.client.username_pw_set(name, password)
+
+    def create_mqtt_user(self, username, password):
+        try:
+            topic = "cloud/admin/user"
+            data = {"command": "create", "name": username, "password": password}
+            self.client.connect(self.ip_addr, PORT)
+            self.client.publish(topic, payload=json.dumps(data), qos=1)
+            self.client.disconnect()
+        except:
+            print("Unable to publish, try again")
+
+    def delete_mqtt_user(self, username):
+        try:
+            topic = "cloud/admin/user"
+            data = {"command": "delete", "name": username}
+            self.client.connect(self.ip_addr, PORT)
+            self.client.publish(topic, payload=json.dumps(data), qos=1)
+            self.client.disconnect()
+        except:
+            print("Unable to publish, try again")
+
+    def publish_mission(self, broker_name, command):
+        try:
+            topic = f"cloud/admin/{broker_name}/all/mission"
+            data = {"command": command}
+            self.client.connect(self.ip_addr, PORT)
+            self.client.publish(topic, payload=json.dumps(data), qos=1)
+            self.client.disconnect()
+        except:
+            print("Unable to publish, try again")
+
+    def publish_dev(self, broker_name, dev_name, data):
+        try:
+            topic = f"cloud/admin/{broker_name}/{dev_name}/dev"
+            self.client.connect(self.ip_addr, PORT)
+            self.client.publish(topic, payload=json.dumps(data), qos=1)
+            self.client.disconnect()
+        except:
+            print("Unable to publish, try again")

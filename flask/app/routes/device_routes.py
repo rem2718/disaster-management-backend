@@ -9,7 +9,6 @@ DEF_PAGE_SIZE = 5
 device = Blueprint("device_routes", __name__, url_prefix="/api/devices")
 
 # TO-DO: check brokers
-# TO-DO: authentication for device regestration
 
 
 @device.route("/", methods=["POST"])
@@ -88,6 +87,13 @@ def update_route(device_id):
     new_password = request.json.get("new_password", None)
 
     return update(user_type, device_id, name, old_password, new_password)
+
+
+@device.route("/<device_id>/state", methods=["PUT"])
+@jwt_required()
+def update_state_route(device_id):
+    state = request.json.get("state", None)
+    return update_state(device_id, state)
 
 
 @device.route("/<device_id>", methods=["DELETE"])

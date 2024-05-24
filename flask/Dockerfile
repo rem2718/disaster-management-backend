@@ -2,7 +2,8 @@ FROM python:3.10-slim
 
 WORKDIR /usr/src/flask_server
 
-COPY . .
+COPY /app /usr/src/flask_server/app
+COPY requirements.txt /usr/src/flask_server/
 
 RUN python -m venv .venv && \
     . .venv/bin/activate && \
