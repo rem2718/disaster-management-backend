@@ -13,7 +13,6 @@ from app.utils.mqtt_interface import *
 MIN_LENGTH = 3
 MAX_LENGTH = 20
 
-# TO-DO: accepted user problem
 # TO-DO: gps problem
 
 
@@ -62,9 +61,9 @@ def login(email_or_username, password):
     if user.status == UserStatus.REJECTED:
         return err_res(403, "Account is rejected. Please contact support.")
 
-    if user.status == UserStatus.ACCEPTED:
+    if not user.has_mqtt_creds:
         mqtt_client.create_mqtt_user(user.username, password)
-        user.status = UserStatus.AVAILABLE
+        user.has_mqtt_creds = True
         user.save()
 
     token = user.generate_token()
@@ -256,7 +255,7 @@ def user_approval(user_type, user_id, approved, type):
 
     if approved:
         enum_validator("UserType", type, UserType)
-        user.status = UserStatus.ACCEPTED
+        user.status = UserStatus.AVAILABLE
         user.type = type
     else:
         user.status = UserStatus.REJECTED
@@ -267,11 +266,13 @@ def user_approval(user_type, user_id, approved, type):
 
 
 @handle_exceptions
-def update_info(user_id, username, email):
+def update_info(user_id, username, email, password):
     if not user_id:
         return err_res(400, "Invalid token")
 
     user = User.objects.get(id=user_id)
+    if user.check_password(password):
+        return err_res(401, "Invalid password.")
 
     if username:
         if user.username != username:
@@ -286,7 +287,8 @@ def update_info(user_id, username, email):
         minlength_validator("Username", username, MIN_LENGTH)
         maxlength_validator("Username", username, MAX_LENGTH)
         user.username = username
-        # TO-DO: update mqtt creds for the user (name)
+        mqtt_client.delete_mqtt_user(user.username)
+        mqtt_client.create_mqtt_user(user.username, password)
 
     if email:
         if user.email != email:
@@ -342,7 +344,7 @@ def delete_user(user_type, user_id):
         Mission.objects(id=mission._id).update_one(pull__user_ids=ObjectId(user_id))
 
     User.objects(id=user_id).update(
-        set__cur_missions=[], set__status=UserStatus.INACTIVE
+        set__cur_missions=[], set__status=UserStatus.INACTIVE, set__has_mqtt_creds=False
     )
 
     mqtt_client.delete_mqtt_user(user.username)

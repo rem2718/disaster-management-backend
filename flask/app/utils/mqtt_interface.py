@@ -23,7 +23,7 @@ class MQTTClient:
                 client.reconnect()
 
         def on_disconnect(client, userdata, rc, properties=None):
-            print("Disconnected from MQTT broker. Retrying in 60 seconds...")
+            print("Disconnected from MQTT broker")
             while True:
                 try:
                     rc = client.reconnect()
@@ -45,8 +45,8 @@ class MQTTClient:
             self.client.connect(self.ip_addr, PORT)
             self.client.publish(topic, payload=json.dumps(data), qos=1)
             self.client.disconnect()
-        except:
-            print("Unable to publish, try again")
+        except Exception as e:
+            print("Unable to publish, try again", str(e))
 
     def delete_mqtt_user(self, username):
         try:

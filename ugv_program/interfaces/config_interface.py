@@ -27,7 +27,7 @@ def scan_for_mqtt_brokers():
     for host in nm.all_hosts():
         if nm[host]["tcp"][1883]["state"] == "open":
             brokers.append(host)
-    return brokers[0] if brokers else ""
+    return brokers[1] if brokers else ""
 
 
 def get_broker_id(mac, token):
@@ -69,7 +69,10 @@ def login(username, password, login_window, root):
 def submit(name, password, mac, type, result_label, broker_ip):
     global dev_name, dev_password, broker_addr, broker_name
     dev_name, dev_password, broker_addr = name, password, broker_ip
-    broker_id, broker_name = get_broker_id(get_mac(broker_ip), token)
+    broker_mac = get_mac(broker_ip)
+    print(broker_mac)
+    print(broker_ip)
+    broker_id, broker_name = get_broker_id(broker_mac, token)
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json",

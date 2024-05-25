@@ -40,7 +40,7 @@ cloud_client.connect("127.0.0.1", 1883)
 topic = "cloud/admin/user"
 # topic = "cloud/admin/test-broker/test-ugv/dev"
 
-data = {"command": "delete", "name": "test-ugv", "password": "test"}
+data = {"command": "create", "name": "test-broker", "password": "Test-broker12"}
 # data = {"username": "test-a", "password": "test"}
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 

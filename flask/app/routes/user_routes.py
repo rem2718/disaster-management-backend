@@ -111,7 +111,8 @@ def update_info_route():
     user_id = get_jwt_identity()["id"]
     username = request.json.get("username", None)
     email = request.json.get("email", None)
-    return update_info(user_id, username, email)
+    password = request.json.get("password", None)
+    return update_info(user_id, username, email, password)
 
 
 @user.route("/password", methods=["PUT"])

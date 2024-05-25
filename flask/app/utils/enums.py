@@ -16,11 +16,10 @@ class DeviceType(IntEnum):
 
 class UserStatus(IntEnum):
     PENDING = 1
-    ACCEPTED = 2
-    AVAILABLE = 3
-    ASSIGNED = 4
-    REJECTED = 5
-    INACTIVE = 6
+    AVAILABLE = 2
+    ASSIGNED = 3
+    REJECTED = 4
+    INACTIVE = 5
 
 
 class DeviceStatus(IntEnum):

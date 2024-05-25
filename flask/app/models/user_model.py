@@ -21,6 +21,7 @@ class User(db.Document):
     username = db.StringField(required=True)
     type = db.EnumField(UserType, default=UserType.REGULAR)
     status = db.EnumField(UserStatus, default=UserStatus.PENDING)
+    has_mqtt_creds = db.BooleanField(default=False)
     cur_missions = db.ListField(
         EmbeddedDocumentField(cur_mission), required=False, default=[]
     )
