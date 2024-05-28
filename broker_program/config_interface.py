@@ -4,12 +4,12 @@ import requests
 import getmac
 import nmap
 
-from config import env_get
+from config import config
 
 token = dev_name = dev_password = None
-login_url = f"{env_get('FLASK_URL')}/api/users/login"
-dev_reg_url = f"{env_get('FLASK_URL')}/api/devices"
-subnet = env_get("SUBNET")
+login_url = f"{config.get('FLASK_URL')}/api/users/login"
+dev_reg_url = f"{config.get('FLASK_URL')}/api/devices"
+subnet = config.get("SUBNET")
 skipped = False
 broker_type = 5
 

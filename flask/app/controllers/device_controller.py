@@ -197,6 +197,13 @@ def get_broker_id(user_type, mac):
 @handle_exceptions
 def update(user_type, device_id, name, old_password, new_password):
     device = Device.objects.get(id=device_id)
+    null_validator(["Password"], [old_password])
+
+    dev_name = device.name
+    dev_password = old_password
+
+    if not device.check_password(old_password):
+        return err_res(401, "Incorrect old password try again.")
 
     if name:
         if device.name != name:
@@ -210,29 +217,23 @@ def update(user_type, device_id, name, old_password, new_password):
         device.name = name
 
     if new_password:
-        if old_password:
-            if old_password == new_password:
-                return err_res(409, "The new password is identical to the current one.")
-            if not device.check_password(old_password):
-                return err_res(401, "Incorrect old password try again.")
+        if old_password == new_password:
+            return err_res(409, "The new password is identical to the current one.")
+        password_validator(new_password)
+        device.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+        dev_password = new_password
 
-            password_validator(new_password)
-            device.password = bcrypt.generate_password_hash(new_password).decode(
-                "utf-8"
-            )
-        else:
-            return err_res(
-                401, "You need to provide the old password in order to change it."
-            )
+    if device.type == DeviceType.BROKER:
+        mqtt_data = {"command": "update", "name": device.name, "password": dev_password}
+        mqtt_client.publish_broker(dev_name, mqtt_data)
+        mqtt_client.delete_mqtt_user(dev_name)
+        mqtt_client.create_mqtt_user(device.name, dev_password)
+    else:
+        broker_name = Device.objects.get(id=device.broker_id.id).name
+        mqtt_data = {"command": "update", "name": device.name, "password": dev_password}
+        mqtt_client.publish_dev(broker_name, dev_name, mqtt_data)
 
     device.save()
-    if device.type == DeviceType.BROKER:
-        # TO-DO: update mqtt creds for the device (new_password)
-        pass
-    else:
-        broker_name = Device.objects.get(id=device.broker_id).name
-        mqtt_data = {"command": "update", "name": device.name, "password": new_password}
-        mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
     data = {
         "message": "Device information is updated successfully.",
         "name": device.name,
@@ -275,9 +276,11 @@ def deactivate(user_type, device_id):
         mission.update(pull__device_ids=ObjectId(device_id))
 
     if device.type == DeviceType.BROKER:
-        # TO-DO: delete mqtt creds for that device
+        if device.status == DeviceStatus.ASSIGNED:
+            return err_res(409, "Assigned brokers can't be deleted.")
+        mqtt_data = {"command": "delete", "name": device.name}
+        mqtt_client.publish_broker(device.name, mqtt_data)
         mqtt_client.delete_mqtt_user(device.name)
-        pass
     else:
         broker_name = Device.objects.get(id=device.broker_id.id).name
         mqtt_data = {"command": "delete", "name": device.name}

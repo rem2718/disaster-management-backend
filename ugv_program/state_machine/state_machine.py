@@ -9,8 +9,8 @@ from state_machine.enums import RobotState, RobotEvent
 from interfaces.rtmp_interface import RobotRTMPClient
 from interfaces.hw_interface.auto import auto_motion
 from interfaces.mqtt_interface.admin_client import *
-from config import env_get, env_update
 from state_machine.stack import Stack
+from config import config
 
 
 motion_queue = []
@@ -79,15 +79,15 @@ class RobotStateMachine:
         skipped, data = config_interface()
         self.broker_addr = data["BROKER_ADDR"]
         print(f"a MQTT broker has detected with IP address {self.broker_addr}")
-        env_update(data)
+        config.update(data)
         if not skipped:
             create_mqtt_user(self.broker_addr, data["NAME"], data["PASSWORD"])
-        if env_get("NAME") == "" or env_get("PASSWORD") == "":
+        if config.get("NAME") == "" or config.get("PASSWORD") == "":
             print("No robot has been configured before. please try again...")
             sys.exit()
-        self.name = env_get("NAME")
-        self.password = env_get("PASSWORD")
-        self.broker_name = env_get("BROKER_NAME")
+        self.name = config.get("NAME")
+        self.password = config.get("PASSWORD")
+        self.broker_name = config.get("BROKER_NAME")
         self.mqtt_client = RobotMQTTClient(
             self.name,
             self.password,
@@ -97,11 +97,11 @@ class RobotStateMachine:
             admin_queue,
         )
         self.rtmp_client = RobotRTMPClient(
-            self.name, self.password, env_get("RTMP_URL"), 0
+            self.name, self.password, config.get("RTMP_URL"), 0
         )
 
     def update_robot(self, data):
-        env_update(data)
+        config.update(data)
         self.name = data["NAME"]
         self.password = data["PASSWORD"]
         self.mqtt_client.stop_client()
@@ -115,12 +115,12 @@ class RobotStateMachine:
         )
         self.rtmp_client.stop_client()
         self.rtmp_client = RobotRTMPClient(
-            self.name, self.password, env_get("RTMP_URL"), 0
+            self.name, self.password, config.get("RTMP_URL"), 0
         )
 
     def delete_robot(self, data):
         if data["deactivate"]:
-            env_update(
+            config.update(
                 {"NAME": "", "PASSWORD": "", "BROKER_ADDR": "", "BROKER_NAME": ""}
             )
             print("Robot is deactivating...")

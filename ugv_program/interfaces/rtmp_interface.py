@@ -1,6 +1,5 @@
 import subprocess
 import threading
-import time
 
 import cv2
 
@@ -8,7 +7,6 @@ import cv2
 class RobotRTMPClient:
     def __init__(self, name, password, link, device_index):
         self.link = f"{link}{name}?username={name}&password={password}"
-        print(self.link)
         self.index = device_index
         self.running = False
 

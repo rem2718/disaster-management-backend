@@ -76,3 +76,12 @@ class MQTTClient:
             self.client.disconnect()
         except:
             print("Unable to publish, try again")
+
+    def publish_broker(self, broker_name, data):
+        try:
+            topic = f"cloud/admin/{broker_name}/dev"
+            self.client.connect(self.ip_addr, PORT)
+            self.client.publish(topic, payload=json.dumps(data), qos=1)
+            self.client.disconnect()
+        except:
+            print("Unable to publish, try again")

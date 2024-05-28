@@ -8,8 +8,6 @@ DEF_PAGE_SIZE = 5
 
 device = Blueprint("device_routes", __name__, url_prefix="/api/devices")
 
-# TO-DO: check brokers
-
 
 @device.route("/", methods=["POST"])
 @jwt_required()

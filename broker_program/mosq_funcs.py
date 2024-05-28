@@ -1,11 +1,11 @@
 import subprocess
 
-from config import env_get
+from config import config
 
 
 def create_mosquitto_user(username, password):
     try:
-        sys_pass = env_get("SYS_PASS")
+        sys_pass = config.get("SYS_PASS")
 
         add_user_command = [
             "sudo",
@@ -35,7 +35,7 @@ def create_mosquitto_user(username, password):
 
 def delete_mosquitto_user(username):
     try:
-        sys_pass = env_get("SYS_PASS")
+        sys_pass = config.get("SYS_PASS")
 
         add_user_command = [
             "sudo",

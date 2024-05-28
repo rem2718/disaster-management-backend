@@ -3,8 +3,6 @@ import time
 
 import paho.mqtt.client as paho
 
-from config import env_get
-
 
 PORT = 1883
 
