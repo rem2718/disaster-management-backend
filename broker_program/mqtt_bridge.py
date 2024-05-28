@@ -120,6 +120,7 @@ try:
     local_client.subscribe(f"cloud/reg/{config.get('CLOUD_NAME')}/+/sensor-data", qos=1)
     local_client.subscribe(f"cloud/reg/{config.get('CLOUD_NAME')}/+/gps", qos=1)
     local_client.subscribe(f"local/admin/{config.get('CLOUD_NAME')}/user", qos=1)
+    cloud_client.subscribe(f"cloud/admin/{config.get('CLOUD_NAME')}/dev", qos=1)
     cloud_client.subscribe(f"cloud/admin/{config.get('CLOUD_NAME')}/+/dev", qos=1)
     cloud_client.subscribe(f"cloud/admin/{config.get('CLOUD_NAME')}/+/mission", qos=1)
     cloud_client.subscribe(f"cloud/reg/{config.get('CLOUD_NAME')}/+/control", qos=1)
