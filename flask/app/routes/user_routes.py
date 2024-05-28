@@ -93,7 +93,14 @@ def get_count_route():
 @jwt_required()
 def get_cur_missions_route():
     user_id = get_jwt_identity()["id"]
-    return get_cur_missions(user_id)
+    page_number = int(request.args.get("page-number", DEF_PAGE_NUM))
+    page_size = int(request.args.get("page-size", DEF_PAGE_SIZE))
+    name = request.args.get("name", None)
+
+    status_list = request.args.getlist("status")
+    statuses = list(map(int, status_list)) if status_list else None
+
+    return get_cur_missions(user_id, page_number, page_size, name, statuses)
 
 
 @user.route("/<user_id>/approval", methods=["PUT"])
@@ -113,6 +120,15 @@ def update_info_route():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
     return update_info(user_id, username, email, password)
+
+
+@user.route("/<user_id>", methods=["PUT"])
+@jwt_required()
+def update_admin_info_route(user_id):
+    user_type = get_jwt_identity()["type"]
+    email = request.json.get("email", None)
+    type = request.json.get("type", None)
+    return update_admin_info(user_type, user_id, email, type)
 
 
 @user.route("/password", methods=["PUT"])

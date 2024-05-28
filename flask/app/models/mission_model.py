@@ -9,6 +9,7 @@ class Mission(db.Document):
     start_date = db.DateTimeField(default=None)
     end_date = db.DateTimeField(default=None)
     status = db.EnumField(MissionStatus, default=MissionStatus.CREATED)
+    broker_id = db.ReferenceField(Device)
     device_ids = db.ListField(db.ReferenceField(Device), default=[])
     user_ids = db.ListField(db.ReferenceField(User), default=[])
     meta = {"collection": "Missions"}

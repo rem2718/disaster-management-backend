@@ -405,6 +405,81 @@
                     }
                 ]
             },
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "User Info Update [ADMIN]",
+                "description": "Update user's email or type",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "description": "ID of the user to retrieve",
+                        "required": true,
+                        "type": "string",
+                        "example": "6055a0ae80e90e08641e22ef"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "User data",
+                        "required": false,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "email": {
+                                    "type": "string",
+                                    "example": "new_email@example.com"
+                                },
+                                "type": {
+                                    "type": "int",
+                                    "example": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User information updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "example": "User information is updated successfully."
+                                },
+                                "email": {
+                                    "type": "string",
+                                    "example": "email@example.com"
+                                },
+                                "username": {
+                                    "type": "string",
+                                    "example": "Username1"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "404": {
+                        "description": "Not Found - User not found"
+                    },
+                    "409": {
+                        "description": "Conflict - The username or email is already taken or identical to the current one"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "User Management"
@@ -644,6 +719,43 @@
                 ],
                 "summary": "User Current Missions Retrievement",
                 "description": "Retrieve all missions in which the user is currently participating actively\n\nMission Statuses(enum):\n1: CREATED\n2: ONGOING\n3: PAUSED",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page-number",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Page number",
+                        "default": 1
+                    },
+                    {
+                        "in": "query",
+                        "name": "page-size",
+                        "type": "integer",
+                        "required": false,
+                        "description": "Number of items per page",
+                        "default": 5
+                    },
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "type": "string",
+                        "required": false,
+                        "description": "filter for mission name",
+                        "default": "mission"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "type": "integer",
+                        "required": false,
+                        "description": "filter for mission status",
+                        "collectionFormat": "multi",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "List of all the current missions",
@@ -1451,6 +1563,11 @@
                                     "example": "Mission ABC",
                                     "required": true
                                 },
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef",
+                                    "required": true
+                                },
                                 "device_ids": {
                                     "type": "array",
                                     "items": {
@@ -1543,6 +1660,10 @@
                                     "type": "string",
                                     "example": "Mission ABC"
                                 },
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef"
+                                },
                                 "start_date": {
                                     "type": "string",
                                     "format": "date-time",
@@ -1618,8 +1739,11 @@
                             "properties": {
                                 "name": {
                                     "type": "string",
-                                    "example": "Mission ABC",
-                                    "required": true
+                                    "example": "Mission ABC"
+                                },
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef"
                                 },
                                 "device_ids": {
                                     "type": "array",
@@ -1652,6 +1776,10 @@
                                 "name": {
                                     "type": "string",
                                     "example": "Mission ABC"
+                                },
+                                "broker_id": {
+                                    "type": "string",
+                                    "example": "6055a0ae20e90e08641e22ef"
                                 },
                                 "device_ids": {
                                     "type": "array",

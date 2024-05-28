@@ -187,7 +187,7 @@ def get_broker_id(user_type, mac):
     broker = Device.objects(mac=mac).first()
 
     if broker and broker.type == DeviceType.BROKER:
-        data = {"broker_id": str(broker.id)}
+        data = {"broker_id": str(broker.id), "broker_name": broker.name}
         return jsonify(data), 200
 
     return err_res(404, "Broker not found")
@@ -274,13 +274,14 @@ def deactivate(user_type, device_id):
     for mission in missions:
         mission.update(pull__device_ids=ObjectId(device_id))
 
-    Device.objects(id=device_id).update(set__status=DeviceStatus.INACTIVE)
     if device.type == DeviceType.BROKER:
         # TO-DO: delete mqtt creds for that device
         mqtt_client.delete_mqtt_user(device.name)
         pass
     else:
-        broker_name = Device.objects.get(id=device.broker_id).name
+        broker_name = Device.objects.get(id=device.broker_id.id).name
         mqtt_data = {"command": "delete", "name": device.name}
         mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
+
+    Device.objects(id=device_id).update(set__status=DeviceStatus.INACTIVE)
     return jsonify({"message": "Device is deactivated successfully."}), 200

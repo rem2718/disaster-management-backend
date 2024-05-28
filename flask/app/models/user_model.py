@@ -36,8 +36,9 @@ class User(db.Document):
             f"email: {self.email}\n"
             f"password: {self.password}\n"
             f"status: {UserStatus(self.status).name}\n"
-            f"type: {UserType(self.type).name}\n"
-            f"cur_missions: {[f'id: {str(mission._id)}, name: {mission.name}, status: {MissionStatus(mission.status).name}' for mission in self.cur_missions]}>"
+            f"type: {UserType(self.type).name}\n",
+            f"has_mqtt_creds: {self.has_mqtt_creds}"
+            f"cur_missions: {[f'id: {str(mission._id)}, name: {mission.name}, status: {MissionStatus(mission.status).name}' for mission in self.cur_missions]}>",
         )
 
     def check_password(self, password):

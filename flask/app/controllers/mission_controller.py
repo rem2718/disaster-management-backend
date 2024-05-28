@@ -64,17 +64,23 @@ def split_sets(existing_list, provided_list):
 
 @authorize_admin
 @handle_exceptions
-def create(user_type, name, device_ids, user_ids):
+def create(user_type, name, broker_id, device_ids, user_ids):
     null_validator(["name", "device_ids", "user_ids"], [name, device_ids, user_ids])
     existing_mission = Mission.objects(name=name).first()
     if existing_mission:
         return err_res(409, "Mission name is already taken.")
     minlength_validator("Name", name, 3)
     maxlength_validator("Name", name, 20)
+    broker_validator(broker_id)
     device_validator(device_ids)
     user_validator(user_ids)
 
-    mission = Mission(name=name, device_ids=device_ids, user_ids=user_ids)
+    mission = Mission(
+        name=name,
+        broker_id=ObjectId(broker_id),
+        device_ids=device_ids,
+        user_ids=user_ids,
+    )
     mission.save()
     update_lists(user_ids, "add_user", mission)
     update_lists(device_ids, "add_device")
@@ -98,6 +104,7 @@ def get_info(user_type, mission_id):
     data = {
         "id": str(mission.id),
         "name": mission.name,
+        "broker_id": str(mission.broker_id),
         "start_date": mission.start_date,
         "end_date": mission.end_date,
         "status": mission.status.value,
@@ -157,7 +164,7 @@ def get_count(user_type, statuses):
 
 @authorize_admin
 @handle_exceptions
-def update(user_type, mission_id, name, device_ids, user_ids):
+def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
     mission = Mission.objects.get(id=mission_id)
     if mission.status in [MissionStatus.CANCELED, MissionStatus.FINISHED]:
         return err_res(
@@ -169,6 +176,10 @@ def update(user_type, mission_id, name, device_ids, user_ids):
         maxlength_validator("Name", name, 20)
         mission.name = name
         update_cur_mission(mission, "name")
+
+    if broker_id:
+        broker_validator(broker_id)
+        mission.broker_id = ObjectId(broker_id)
 
     if device_ids != None:
         added_ids, deleted_ids = split_sets(mission.device_ids, device_ids)
@@ -189,6 +200,7 @@ def update(user_type, mission_id, name, device_ids, user_ids):
         "message": "mission is updated successfully.",
         "id": str(mission.id),
         "name": mission.name,
+        "broker_id": str(mission.broker_id),
         "status": mission.status.value,
         "user_ids": [str(user.id) for user in mission.user_ids],
         "device_ids": [str(device.id) for device in mission.device_ids],

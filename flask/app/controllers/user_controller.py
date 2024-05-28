@@ -13,8 +13,6 @@ from app.utils.mqtt_interface import *
 MIN_LENGTH = 3
 MAX_LENGTH = 20
 
-# TO-DO: gps problem
-
 
 @handle_exceptions
 def signup(email, password, username):
@@ -227,20 +225,44 @@ def get_count(user_type, statuses, types):
 
 
 @handle_exceptions
-def get_cur_missions(user_id):
+def get_cur_missions(user_id, page_number, page_size, name, statuses):
     if not user_id:
         return err_res(400, "Invalid token")
 
     user = User.objects.get(id=user_id)
+    filtered_missions = user.cur_missions
+    if name:
+        filtered_missions = [
+            mission
+            for mission in filtered_missions
+            if name.lower() in mission.name.lower()
+        ]
+    if statuses:
+        filtered_missions = [
+            mission for mission in filtered_missions if mission.status.value in statuses
+        ]
+
     missions = [
         {
             "mission_id": str(mission._id),
             "name": mission.name,
             "status": mission.status.value,
         }
-        for mission in user.cur_missions
+        for mission in filtered_missions
     ]
-    data = {"cur_missions": missions}
+
+    total_missions = len(missions)
+    total_pages = (total_missions + page_size - 1) // page_size
+    start = (page_number - 1) * page_size
+    end = start + page_size
+    paginated_missions = missions[start:end]
+    data = {
+        "items": paginated_missions,
+        "has_next": page_number < total_pages,
+        "has_prev": page_number > 1,
+        "page": page_number,
+        "total_pages": total_pages,
+    }
     return jsonify(data), 200
 
 
@@ -304,6 +326,58 @@ def update_info(user_id, username, email, password):
         "message": "User information is updated successfully.",
         "email": user.email,
         "username": user.username,
+    }
+    return jsonify(data), 200
+
+
+@handle_exceptions
+def update_password(user_id, old_password, new_password):
+    if not user_id:
+        return err_res(400, "Invalid token")
+
+    null_validator(["Old password", "New password"], [old_password, new_password])
+
+    if old_password == new_password:
+        return err_res(409, "The new password is identical to the current one.")
+
+    user = User.objects.get(id=user_id)
+
+    if not user.check_password(old_password):
+        return err_res(401, "Incorrect old password try again.")
+
+    password_validator(new_password)
+
+    user.password = bcrypt.generate_password_hash(new_password).decode("utf-8")
+
+    mqtt_client.delete_mqtt_user(user.username)
+    mqtt_client.create_mqtt_user(user.username, new_password)
+    user.save()
+    return jsonify({"message": "Password is updated successfully."}), 200
+
+
+@authorize_admin
+@handle_exceptions
+def update_admin_info(user_type, user_id, email, type):
+    user = User.objects.get(id=user_id)
+
+    if email:
+        if user.email != email:
+            existing_user = User.objects(email=email).first()
+            if existing_user:
+                return err_res(409, "Email is already taken.")
+        else:
+            return err_res(409, "The email provided is identical to the current one.")
+        user.email = email
+
+    if type:
+        enum_validator("UserType", type, UserType)
+        user.type = type
+
+    user.save()
+    data = {
+        "message": "User information is updated successfully.",
+        "email": user.email,
+        "type": user.type,
     }
     return jsonify(data), 200
 

@@ -1,3 +1,4 @@
+from bson import ObjectId
 import re
 
 from mongoengine.errors import ValidationError, DoesNotExist
@@ -54,7 +55,9 @@ def enum_validator(enum_name, value, enum):
 
 def device_validator(device_ids):
     existing_devices = Device.objects(
-        Q(id__in=device_ids) & Q(status=DeviceStatus.AVAILABLE)
+        Q(id__in=device_ids)
+        & Q(status=DeviceStatus.AVAILABLE)
+        & Q(type__en=DeviceType.BROKER)
     )
     existing_set = set(str(device.id) for device in existing_devices)
     provided_set = set(device_ids)
@@ -82,7 +85,7 @@ def user_validator(user_ids):
 
 def broker_validator(broker_id):
     existing_broker = Device.objects(
-        Q(id=broker_id)
+        Q(id=ObjectId(broker_id))
         & Q(type=DeviceType.BROKER)
         & Q(status__ne=DeviceStatus.INACTIVE)
     )

@@ -70,8 +70,6 @@ def submit(name, password, mac, type, result_label, broker_ip):
     global dev_name, dev_password, broker_addr, broker_name
     dev_name, dev_password, broker_addr = name, password, broker_ip
     broker_mac = get_mac(broker_ip)
-    print(broker_mac)
-    print(broker_ip)
     broker_id, broker_name = get_broker_id(broker_mac, token)
     headers = {
         "Authorization": f"Bearer {token}",

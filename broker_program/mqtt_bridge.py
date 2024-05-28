@@ -47,13 +47,13 @@ def cloud_on_message(client, userdata, msg):
     levels = msg.topic.split("/")
     robot = levels[3]
     print(msg.topic, robot)
+    local_client.publish(msg.topic, payload=json.dumps(data), qos=1)
     if msg.topic.startswith(f"cloud/admin/{env_get('CLOUD_NAME')}/"):
         if data["command"] == "update":
             delete_mosquitto_user(robot)
             create_mosquitto_user(data["name"], data["password"])
         elif data["command"] == "delete":
             delete_mosquitto_user(robot)
-    local_client.publish(msg.topic, payload=json.dumps(data), qos=1)
     print(f"Published message")
 
 

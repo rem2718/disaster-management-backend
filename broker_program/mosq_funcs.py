@@ -57,6 +57,6 @@ def delete_mosquitto_user(username):
             ]
             subprocess.run(reload_command, check=True)
 
-        print(f"User '{username}' created successfully.")
+        print(f"User '{username}' deleted successfully.")
     except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to create user '{username}': {e}")
+        print(f"Error: Failed to delete user '{username}': {e}")

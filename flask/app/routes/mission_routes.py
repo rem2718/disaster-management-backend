@@ -16,9 +16,10 @@ DEF_PAGE_SIZE = 5
 def create_route():
     user_type = get_jwt_identity()["type"]
     name = request.json.get("name", None)
+    broker_id = request.json.get("broker_id", None)
     device_ids = request.json.get("device_ids", None)
     user_ids = request.json.get("user_ids", None)
-    return create(user_type, name, device_ids, user_ids)
+    return create(user_type, name, broker_id, device_ids, user_ids)
 
 
 @mission.route("/<mission_id>", methods=["GET"])
@@ -58,9 +59,10 @@ def get_count_route():
 def update_route(mission_id):
     user_type = get_jwt_identity()["type"]
     name = request.json.get("name", None)
+    broker_id = request.json.get("broker_id", None)
     device_ids = request.json.get("device_ids", None)
     user_ids = request.json.get("user_ids", None)
-    return update(user_type, mission_id, name, device_ids, user_ids)
+    return update(user_type, mission_id, name, broker_id, device_ids, user_ids)
 
 
 @mission.route("/<mission_id>/<command>", methods=["PUT"])
