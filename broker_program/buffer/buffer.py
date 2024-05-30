@@ -43,7 +43,7 @@ class Buffer:
             "data": data,
         }
         self.buffer_queue.append(item)
-        print(f"Buffered message: {data['id']}")
+        print("Buffered message")
 
     def publish_file(self, client):
         buffer_file = open(self.buffer_path, "r+")
@@ -55,7 +55,7 @@ class Buffer:
                 if isinstance(value, Decimal):
                     data[key] = float(value)
             client.publish(topic, payload=json.dumps(data), qos=1)
-            print(f"Published message from buffer file: {data['id']}")
+            print("Published message from buffer file")
         buffer_file.truncate(0)
         buffer_file.close()
 
@@ -65,4 +65,4 @@ class Buffer:
             topic = item["topic"]
             data = item["data"]
             client.publish(topic, payload=json.dumps(data), qos=1)
-            print(f"Published message from buffer queue: {data['id']}")
+            print(f"Published message from buffer queue")

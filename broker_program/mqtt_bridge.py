@@ -89,6 +89,7 @@ def cloud_on_message(client, userdata, msg):
 def local_on_message(client, userdata, msg):
     data_str = msg.payload.decode("utf-8")
     data = json.loads(data_str)
+    print(msg.topic)
     if msg.topic == f"local/admin/{config.get('CLOUD_NAME')}/user":
         create_mosquitto_user(data["username"], data["password"])
     elif msg.topic.startswith("cloud/reg/"):
