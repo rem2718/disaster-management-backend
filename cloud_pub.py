@@ -27,8 +27,7 @@ cloud_client = paho.Client(client_id="test-ugv", userdata=None)
 cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
-# cloud_client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-# cloud_client.username_pw_set("cloud-test", "Cloud-Test12")
+# cloud_client.username_pw_set("test-broker", "Test-broker-12")
 # cloud_client.username_pw_set("admin-ugv", "UgvAdmin@1984")
 cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 

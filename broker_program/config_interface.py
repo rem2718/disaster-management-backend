@@ -2,7 +2,6 @@ from tkinter import messagebox
 import tkinter as tk
 import requests
 import getmac
-import nmap
 
 from config import config
 
@@ -17,16 +16,6 @@ broker_type = 5
 def get_mac(ip=None):
     mac_address = getmac.get_mac_address(ip=ip)
     return mac_address
-
-
-def scan_for_mqtt_brokers():
-    nm = nmap.PortScanner()
-    nm.scan(hosts=subnet, arguments="-p 1883 --open")
-    brokers = []
-    for host in nm.all_hosts():
-        if nm[host]["tcp"][1883]["state"] == "open":
-            brokers.append(host)
-    return brokers[0] if brokers else ""
 
 
 def skip(login_window, root):
