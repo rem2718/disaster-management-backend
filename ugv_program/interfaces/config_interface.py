@@ -27,7 +27,7 @@ def scan_for_mqtt_brokers():
     for host in nm.all_hosts():
         if nm[host]["tcp"][1883]["state"] == "open":
             brokers.append(host)
-    return brokers[1] if brokers else ""
+    return brokers[0] if brokers else ""
 
 
 def get_broker_id(mac, token):

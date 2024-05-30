@@ -44,13 +44,15 @@ def on_disconnect(client, userdata, rc, properties=None):
 def cloud_on_message(client, userdata, msg):
     data_str = msg.payload.decode("utf-8")
     data = json.loads(data_str)
-    levels = msg.topic.split("/")
-    robot = levels[3]
-    print(msg.topic, robot)
+    print(msg.topic)
     local_client.publish(msg.topic, payload=json.dumps(data), qos=1)
 
     if msg.topic.startswith(f"cloud/admin/{config.get('CLOUD_NAME')}/dev"):
         if data["command"] == "update":
+            if config.get("CLOUD_NAME") != data["name"]:
+                topic = f"cloud/admin/{config.get('CLOUD_NAME')}/all/broker"
+                l_data = {"command": "update", "broker_name": data["name"]}
+                local_client.publish(topic, payload=json.dumps(l_data), qos=1)
             config.update(
                 {"CLOUD_NAME": data["name"], "CLOUD_PASSWORD": data["password"]}
             )
@@ -66,6 +68,8 @@ def cloud_on_message(client, userdata, msg):
             cloud_client.loop_stop()
             sys.exit()
     elif msg.topic.startswith(f"cloud/admin/{config.get('CLOUD_NAME')}/"):
+        levels = msg.topic.split("/")
+        robot = levels[3]
         if data["command"] == "update":
             delete_mosquitto_user(robot)
             create_mosquitto_user(data["name"], data["password"])

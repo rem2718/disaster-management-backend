@@ -20,7 +20,7 @@ class RobotMQTTClient:
                 print(f"Connected to {client._port}")
                 client.subscribe(f"cloud/reg/{broker_name}/{name}/control", qos=1)
                 client.subscribe(f"cloud/admin/{broker_name}/{name}/dev", qos=1)
-                client.subscribe(f"cloud/admin/{broker_name}/all/mission", qos=1)
+                client.subscribe(f"cloud/admin/{broker_name}/all/+", qos=1)
                 # TO-DO: sub to local topic if you have any
             else:
                 print("Connection to MQTT broker failed. Retrying in 60 seconds...")
@@ -46,7 +46,7 @@ class RobotMQTTClient:
             topics_levels = topic.split("/")
             command = topics_levels[-1]
             print(f"A message received for {command}")
-            if command == "mission" or command == "dev":
+            if command == "mission" or command == "dev" or command == "broker":
                 admin_queue.append((command, data))
             elif command == "control":
                 motion_queue.append((command, data))
@@ -69,5 +69,5 @@ class RobotMQTTClient:
 
     def stop_client(self):
         print("Disconnecting from MQTT broker")
-        self.client.loop_stop()
         self.client.disconnect()
+        # self.client.loop_stop()

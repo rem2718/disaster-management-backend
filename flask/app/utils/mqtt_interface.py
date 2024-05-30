@@ -22,20 +22,7 @@ class MQTTClient:
                 time.sleep(60)
                 client.reconnect()
 
-        def on_disconnect(client, userdata, rc, properties=None):
-            print("Disconnected from MQTT broker")
-            while True:
-                try:
-                    rc = client.reconnect()
-                    if rc == 0:
-                        break
-                    else:
-                        time.sleep(60)
-                except Exception as e:
-                    time.sleep(60)
-
         self.client.on_connect = on_connect
-        self.client.on_disconnect = on_disconnect
         self.client.username_pw_set(name, password)
 
     def create_mqtt_user(self, username, password):

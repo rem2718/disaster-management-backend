@@ -171,7 +171,7 @@ class RobotStateMachine:
         elem = admin_queue.pop(0) if admin_queue else None
         if elem == None:
             return
-        _, data = elem
+        type, data = elem
         command = data["command"]
         if command == "start":
             self.transition(RobotEvent.START_MISN)
@@ -181,20 +181,20 @@ class RobotStateMachine:
             self.transition(RobotEvent.BACK)
         elif command == "end":
             self.transition(RobotEvent.HALT_MISN)
-        elif command == "update":
+        elif command == "update" and type == "dev":
             new_data = {"NAME": data["name"], "PASSWORD": data["password"]}
             self.transition(RobotEvent.UPDATE, new_data)
+        elif command == "update" and type == "broker":
+            self.broker_name = data["name"]
+            config.update({"BROKER_NAME": data["name"]})
         elif command == "delete":
             new_data = {"deactivate": True}
             self.transition(RobotEvent.DELETE, new_data)
         elif command == "switch":
-            if data["state"] == "auto" and self.states.cur() == RobotState.CONTROLLED:
-                self.transition(RobotEvent.AUTO)
-            elif (
-                data["state"] == "control"
-                and self.states.cur() == RobotState.AUTONOMOUS
-            ):
+            if data["state"] == "control" and self.states.cur() == RobotState.AUTONOMOUS:
                 self.transition(RobotEvent.CONTROL)
+            elif data["state"] == "auto" and self.states.cur() == RobotState.CONTROLLED:
+                self.transition(RobotEvent.AUTO)
         else:
             print("Invalid admin command")
 
