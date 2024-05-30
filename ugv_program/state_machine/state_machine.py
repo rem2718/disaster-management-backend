@@ -181,17 +181,25 @@ class RobotStateMachine:
             self.transition(RobotEvent.BACK)
         elif command == "end":
             self.transition(RobotEvent.HALT_MISN)
-        elif command == "update" and type == "dev":
-            new_data = {"NAME": data["name"], "PASSWORD": data["password"]}
-            self.transition(RobotEvent.UPDATE, new_data)
-        elif command == "update" and type == "broker":
-            self.broker_name = data["name"]
-            config.update({"BROKER_NAME": data["name"]})
+        elif command == "update":
+            if type == "broker":
+                self.broker_name = data["broker_name"]
+                config.update({"BROKER_NAME": self.broker_name})
+                self.mqtt_client.update_broker(self.broker_name)
+                topic = f"cloud/reg/{self.broker_name}/{self.name}/sensor-data"
+                self.mqtt_client.publish(topic, {})
+                print(self.broker_name)
+            else:
+                new_data = {"NAME": data["name"], "PASSWORD": data["password"]}
+                self.transition(RobotEvent.UPDATE, new_data)
         elif command == "delete":
             new_data = {"deactivate": True}
             self.transition(RobotEvent.DELETE, new_data)
         elif command == "switch":
-            if data["state"] == "control" and self.states.cur() == RobotState.AUTONOMOUS:
+            if (
+                data["state"] == "control"
+                and self.states.cur() == RobotState.AUTONOMOUS
+            ):
                 self.transition(RobotEvent.CONTROL)
             elif data["state"] == "auto" and self.states.cur() == RobotState.CONTROLLED:
                 self.transition(RobotEvent.AUTO)

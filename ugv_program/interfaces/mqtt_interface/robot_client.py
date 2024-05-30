@@ -67,6 +67,17 @@ class RobotMQTTClient:
             print("Unable to publish, try again")
             # TO-DO: here you can apply buffering mechanisms
 
+    def update_broker(self, broker_name):
+        self.client.unsubscribe(f"cloud/reg/{self.broker_name}/{self.name}/control")
+        self.client.unsubscribe(f"cloud/admin/{self.broker_name}/{self.name}/dev")
+        self.client.unsubscribe(f"cloud/admin/{self.broker_name}/all/+")
+        self.broker_name = broker_name
+        self.client.subscribe(
+            f"cloud/reg/{self.broker_name}/{self.name}/control", qos=1
+        )
+        self.client.subscribe(f"cloud/admin/{self.broker_name}/{self.name}/dev", qos=1)
+        self.client.subscribe(f"cloud/admin/{self.broker_name}/all/+", qos=1)
+
     def stop_client(self):
         print("Disconnecting from MQTT broker")
         self.client.disconnect()
