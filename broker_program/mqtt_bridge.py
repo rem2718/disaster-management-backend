@@ -99,7 +99,7 @@ def local_on_message(client, userdata, msg):
             buffer.buffer_to_queue(msg.topic, data)
 
 
-def sub(update, local_client, cloud_client, broker_name):
+def sub(update, broker_name):
     if update:
         old_name = config.get("CLOUD_NAME")
         local_client.unsubscribe(f"cloud/reg/{old_name}/+/sensor-data")
@@ -151,7 +151,7 @@ try:
     local_client.loop_start()
     cloud_client.loop_start()
 
-    sub(False, local_client, cloud_client, config.get("CLOUD_NAME"))
+    sub(False, config.get("CLOUD_NAME"))
 
     while True:
         if connected:
