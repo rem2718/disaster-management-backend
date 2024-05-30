@@ -11,7 +11,6 @@ from app.utils.validators import *
 from app.utils.extensions import *
 
 # TO-DO: mqtt mission
-# TO-DO: mission dup devices, users
 
 
 def update_cur_mission(mission, type):
@@ -65,21 +64,23 @@ def split_sets(existing_list, provided_list):
 @authorize_admin
 @handle_exceptions
 def create(user_type, name, broker_id, device_ids, user_ids):
-    null_validator(["name", "device_ids", "user_ids"], [name, device_ids, user_ids])
+    null_validator(
+        ["name", "broker_id", "device_ids", "user_ids"],
+        [name, broker_id, device_ids, user_ids],
+    )
     existing_mission = Mission.objects(name=name).first()
     if existing_mission:
         return err_res(409, "Mission name is already taken.")
     minlength_validator("Name", name, 3)
     maxlength_validator("Name", name, 20)
     broker_validator(broker_id)
-    device_validator(device_ids)
+    device_validator(device_ids, broker_id)
     user_validator(user_ids)
-
     mission = Mission(
         name=name,
         broker_id=ObjectId(broker_id),
-        device_ids=device_ids,
-        user_ids=user_ids,
+        device_ids=set(device_ids),
+        user_ids=set(user_ids),
     )
     mission.save()
     update_lists(user_ids, "add_user", mission)
@@ -111,7 +112,7 @@ def get_info(user_type, mission_id):
         "devices": devices,
     }
 
-    if user_type == UserType.ADMIN.value:
+    if user_type == UserType.ADMIN:
         users = []
         for r in mission.user_ids:
             user = User.objects.get(id=str(r.id))
@@ -186,14 +187,14 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         device_validator(added_ids)
         update_lists(added_ids, "add_device")
         update_lists(deleted_ids, "delete_device")
-        mission.device_ids = [ObjectId(_id) for _id in device_ids]
+        mission.device_ids = set(device_ids)
 
     if user_ids != None:
         user_validator(user_ids)
         added_ids, deleted_ids = split_sets(mission.user_ids, user_ids)
         update_lists(added_ids, "add_user", mission)
         update_lists(deleted_ids, "delete_user", mission)
-        mission.user_ids = [ObjectId(_id) for _id in user_ids]
+        mission.user_ids = set(user_ids)
 
     mission.save()
     data = {
@@ -217,24 +218,28 @@ def change_status(user_type, mission_id, command):
     if mission.status in finished_statues:
         return err_res(409, "This mission is already finished.")
 
+    broker_name = Device.objects.get(id=mission.broker_id.id).name
     match command:
         case "start":
             if mission.status in ongoing_statues:
                 return err_res(409, "This mission is already started.")
             mission.status = MissionStatus.ONGOING
             mission.start_date = datetime.now()
+            mqtt_client.publish_mission(broker_name, "start")
         case "pause":
             if mission.status == MissionStatus.CREATED:
                 return err_res(409, "This mission hasn't started yet.")
             if mission.status == MissionStatus.PAUSED:
                 return err_res(409, "This mission is already paused.")
             mission.status = MissionStatus.PAUSED
+            mqtt_client.publish_mission(broker_name, "pause")
         case "continue":
             if mission.status == MissionStatus.CREATED:
                 return err_res(409, "This mission hasn't started yet.")
             if mission.status == MissionStatus.ONGOING:
                 return err_res(409, "This mission is already ongoing.")
             mission.status = MissionStatus.ONGOING
+            mqtt_client.publish_mission(broker_name, "continue")
         case "cancel":
             if mission.status in ongoing_statues:
                 return err_res(409, "You can only end a starting mission.")
@@ -254,6 +259,7 @@ def change_status(user_type, mission_id, command):
             )
             mission.status = MissionStatus.FINISHED
             mission.end_date = datetime.now()
+            mqtt_client.publish_mission(broker_name, "end")
         case _:
             return err_res(400, "the command provided is invalid.")
 

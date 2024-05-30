@@ -53,12 +53,14 @@ def enum_validator(enum_name, value, enum):
         raise ValidationError(f"{value} is not a valid {enum_name} type")
 
 
-def device_validator(device_ids):
+def device_validator(device_ids, broker_id):
     existing_devices = Device.objects(
         Q(id__in=device_ids)
         & Q(status=DeviceStatus.AVAILABLE)
-        & Q(type__en=DeviceType.BROKER)
+        & Q(type__ne=DeviceType.BROKER)
+        & Q(broker_id=ObjectId(broker_id))
     )
+
     existing_set = set(str(device.id) for device in existing_devices)
     provided_set = set(device_ids)
     missing_devices = provided_set - existing_set
@@ -87,7 +89,7 @@ def broker_validator(broker_id):
     existing_broker = Device.objects(
         Q(id=ObjectId(broker_id))
         & Q(type=DeviceType.BROKER)
-        & Q(status__ne=DeviceStatus.INACTIVE)
+        & Q(status=DeviceStatus.AVAILABLE)
     )
     if not existing_broker:
         raise DoesNotExist(f"Invalid broker ID: {broker_id}")
