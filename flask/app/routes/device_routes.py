@@ -94,6 +94,15 @@ def update_state_route(device_id):
     return update_state(device_id, state)
 
 
+@device.route("/broker", methods=["PUT"])
+@jwt_required()
+def update_broker_route():
+    user_type = get_jwt_identity()["type"]
+    name = request.json.get("name", None)
+    broker_mac = request.json.get("broker_mac", None)
+    return update_broker(user_type, name, broker_mac)
+
+
 @device.route("/<device_id>", methods=["DELETE"])
 @jwt_required()
 def deactivate_route(device_id):

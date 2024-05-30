@@ -262,6 +262,30 @@ def update_state(device_id, state):
 
 @authorize_admin
 @handle_exceptions
+def update_broker(user_type, name, broker_mac):
+    device = Device.objects(Q(name=name) & Q(status__ne=DeviceStatus.INACTIVE)).first()
+    broker = Device.objects(
+        Q(mac=broker_mac) & Q(status__ne=DeviceStatus.INACTIVE)
+    ).first()
+
+    if not device:
+        return err_res(404, "Device not found.")
+
+    if not broker:
+        err_res(404, "Broker not found.")
+
+    device.broker_id = broker.id
+
+    device.save()
+    data = {
+        "message": "Device broker is updated successfully.",
+        "broker_name": broker.name,
+    }
+    return jsonify(data), 200
+
+
+@authorize_admin
+@handle_exceptions
 def deactivate(user_type, device_id):
     null_validator(["Device ID"], [device_id])
     device = Device.objects.get(id=device_id)
@@ -281,6 +305,7 @@ def deactivate(user_type, device_id):
         mqtt_data = {"command": "delete", "name": device.name}
         mqtt_client.publish_broker(device.name, mqtt_data)
         mqtt_client.delete_mqtt_user(device.name)
+        Device.objects(broker_id=ObjectId(device_id)).update(set__broker_id=None)
     else:
         broker_name = Device.objects.get(id=device.broker_id.id).name
         mqtt_data = {"command": "delete", "name": device.name}

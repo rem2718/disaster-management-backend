@@ -54,10 +54,6 @@ def update(data):
 def delete():
     config.update({"CLOUD_NAME": "", "CLOUD_PASSWORD": ""})
     print("Bridge Program terminated...")
-    local_client.disconnect()
-    local_client.loop_stop()
-    cloud_client.disconnect()
-    cloud_client.loop_stop()
     sys.exit()
 
 

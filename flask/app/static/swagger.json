@@ -1542,6 +1542,64 @@
                 ]
             }
         },
+        "/api/devices/broker": {
+            "put": {
+                "tags": [
+                    "Device Management"
+                ],
+                "summary": "Device Broker Update [ADMIN - ROBOT]",
+                "description": "update broker of the device",
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "Device data",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "dev1"
+                                },
+                                "broker_mac": {
+                                    "type": "string",
+                                    "example": "00:0a:95:9d:68:16"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Device state is updated successfully"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized Error - Admin access is required"
+                    },
+                    "403": {
+                        "description": "Forbidden Error"
+                    },
+                    "404": {
+                        "description": "Not Found - Device not found"
+                    },
+                    "409": {
+                        "description": "Conflict"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/missions": {
             "post": {
                 "tags": [

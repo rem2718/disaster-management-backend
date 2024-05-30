@@ -10,6 +10,7 @@ token = dev_name = dev_password = broker_addr = broker_name = None
 login_url = f"{config.get('FLASK_URL')}/api/users/login"
 dev_reg_url = f"{config.get('FLASK_URL')}/api/devices"
 broker_url = f"{config.get('FLASK_URL')}/api/devices/broker_id"
+update_broker_url = f"{config.get('FLASK_URL')}/api/devices/broker"
 device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION"]
 subnet = config.get("SUBNET")
 skipped = False
@@ -43,14 +44,16 @@ def get_broker_id(mac, token):
     return broker_id, broker_name
 
 
-def skip(login_window, root):
+def skip(login_window, options, broker, root):
     global skipped
     skipped = True
+    options.destroy()
+    broker.destroy()
     login_window.destroy()
     root.destroy()
 
 
-def login(username, password, login_window, root):
+def login(username, password, login_window, options):
     global token
     data = {"email_or_username": username, "password": password}
     try:
@@ -58,7 +61,7 @@ def login(username, password, login_window, root):
         response.raise_for_status()
         token = response.json().get("token")
         if token:
-            root.deiconify()
+            options.deiconify()
             login_window.destroy()
         else:
             messagebox.showerror("Error", "Invalid token received.")
@@ -97,6 +100,45 @@ def submit(name, password, mac, type, result_label, broker_ip):
         result_label.config(text=f"Failed to send request: {e}", foreground="red")
 
 
+def open_register(root, options):
+    root.deiconify()
+    options.destroy()
+
+
+def open_broker(broker, options):
+    broker.deiconify()
+    options.destroy()
+
+
+def config_submit(name, password, broker_ip, result_label, root):
+    global dev_name, dev_password, broker_addr, broker_name
+    dev_name, dev_password, broker_addr = name, password, broker_ip
+    broker_mac = get_mac(broker_ip)
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+    data = {
+        "name": name,
+        "password": password,
+        "broker_mac": broker_mac,
+    }
+    try:
+        response = requests.put(update_broker_url, json=data, headers=headers)
+        response.raise_for_status()
+        res = response.json()
+        if response.status_code == 200:
+            result_label.config(text="Request sent successfully!", foreground="green")
+            broker_name = res["broker_name"]
+            root.destroy()
+        else:
+            result_label.config(
+                text=f"Failed to send request: {res['message']}", foreground="red"
+            )
+    except requests.RequestException as e:
+        result_label.config(text=f"Failed to send request: {e}", foreground="red")
+
+
 def config_interface():
     print("configuring the robot...")
     broker_ip = scan_for_mqtt_brokers()
@@ -123,7 +165,7 @@ def config_interface():
         login_window,
         text="Login",
         command=lambda: login(
-            username_entry.get(), password_entry.get(), login_window, root
+            username_entry.get(), password_entry.get(), login_window, options
         ),
     )
     login_button.grid(row=4, column=0, padx=10, pady=10)
@@ -131,9 +173,61 @@ def config_interface():
     skip_button = tk.Button(
         login_window,
         text="Skip",
-        command=lambda: skip(login_window, root),
+        command=lambda: skip(login_window, options, broker, root),
     )
     skip_button.grid(row=4, column=1, padx=10, pady=10)
+
+    options = tk.Tk()
+    options.title("Configuration Options")
+    options.withdraw()
+
+    options_title = tk.Label(options, text="Choose what option you want:")
+    options_title.grid(row=0, columnspan=2, pady=5)
+
+    register_button = tk.Button(
+        options,
+        text="Register a new robot",
+        command=lambda: open_register(root, options),
+    )
+    register_button.grid(row=1, column=0, pady=15)
+
+    broker_button = tk.Button(
+        options,
+        text="Configure a new broker",
+        command=lambda: open_broker(broker, options),
+    )
+    broker_button.grid(row=1, column=2, pady=15, padx=10)
+
+    broker = tk.Tk()
+    broker.title("Broker Configuration")
+    broker.withdraw()
+    broker_title = tk.Label(broker, text="fill the following information:")
+    broker_title.grid(row=0, columnspan=2, pady=5)
+    label_robot_name = tk.Label(broker, text="Device Name:")
+    label_robot_name.grid(row=1, column=0, pady=5)
+    entry_robot_name = tk.Label(broker, text=config.get("NAME"))
+    entry_robot_name.grid(row=1, column=1, pady=5)
+
+    label_broker_ip = tk.Label(broker, text="Broker IP address:")
+    label_broker_ip.grid(row=2, column=0, pady=5)
+    entry_broker_ip = tk.Entry(broker)
+    entry_broker_ip.grid(row=2, column=1, pady=5, padx=10)
+    entry_broker_ip.insert(0, broker_ip)
+
+    config_button = tk.Button(
+        broker,
+        text="Submit",
+        command=lambda: config_submit(
+            config.get("NAME"),
+            config.get("PASSWORD"),
+            entry_broker_ip.get(),
+            result_label_1,
+            root,
+        ),
+    )
+    config_button.grid(row=3, columnspan=2, pady=10)
+    result_label_1 = tk.Label(broker, text="")
+    result_label_1.grid(row=4, columnspan=2, pady=10)
 
     root = tk.Tk()
     root.title("Device Registration Form")
