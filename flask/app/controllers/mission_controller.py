@@ -81,8 +81,8 @@ def create(user_type, name, broker_id, device_ids, user_ids):
     mission = Mission(
         name=name,
         broker_id=ObjectId(broker_id),
-        device_ids=set(device_ids),
-        user_ids=set(user_ids),
+        device_ids=list(set(device_ids)),
+        user_ids=list(set(user_ids)),
     )
     mission.save()
     update_lists(user_ids, "add_user", mission)
@@ -185,6 +185,13 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         broker_validator(broker_id)
         mission.broker_id = ObjectId(broker_id)
 
+    if user_ids != None:
+        user_validator(user_ids)
+        added_ids, deleted_ids = split_sets(mission.user_ids, user_ids)
+        update_lists(added_ids, "add_user", mission)
+        update_lists(deleted_ids, "delete_user", mission)
+        mission.user_ids = list(set(user_ids))
+
     if device_ids != None:
         added_ids, deleted_ids = split_sets(mission.device_ids, device_ids)
         device_validator(added_ids, str(mission.broker_id.id), True)
@@ -200,14 +207,7 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
             for dev in deleted_ids:
                 dev_name = Device.objects.get(id=ObjectId(dev)).name
                 mqtt_client.publish_mission(broker_name, "end", dev_name=dev_name)
-        mission.device_ids = set(device_ids)
-
-    if user_ids != None:
-        user_validator(user_ids)
-        added_ids, deleted_ids = split_sets(mission.user_ids, user_ids)
-        update_lists(added_ids, "add_user", mission)
-        update_lists(deleted_ids, "delete_user", mission)
-        mission.user_ids = set(user_ids)
+        mission.device_ids = list(set(device_ids))
 
     device_validator(
         [str(mission.id) for mission in mission.device_ids],
@@ -219,7 +219,7 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         "message": "mission is updated successfully.",
         "id": str(mission.id),
         "name": mission.name,
-        "broker_id": str(mission.broker_id),
+        "broker_id": str(mission.broker_id.id),
         "status": mission.status.value,
         "user_ids": [str(user.id) for user in mission.user_ids],
         "device_ids": [str(device.id) for device in mission.device_ids],
