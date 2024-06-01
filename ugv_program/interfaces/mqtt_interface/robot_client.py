@@ -19,7 +19,7 @@ class RobotMQTTClient:
             if rc == 0:
                 print(f"Connected to {client._port}")
                 client.subscribe(f"cloud/reg/{broker_name}/{name}/control", qos=1)
-                client.subscribe(f"cloud/admin/{broker_name}/{name}/dev", qos=1)
+                client.subscribe(f"cloud/admin/{broker_name}/{name}/+", qos=1)
                 client.subscribe(f"cloud/admin/{broker_name}/all/+", qos=1)
                 # TO-DO: sub to local topic if you have any
             else:
@@ -69,13 +69,13 @@ class RobotMQTTClient:
 
     def update_broker(self, broker_name):
         self.client.unsubscribe(f"cloud/reg/{self.broker_name}/{self.name}/control")
-        self.client.unsubscribe(f"cloud/admin/{self.broker_name}/{self.name}/dev")
+        self.client.unsubscribe(f"cloud/admin/{self.broker_name}/{self.name}/+")
         self.client.unsubscribe(f"cloud/admin/{self.broker_name}/all/+")
         self.broker_name = broker_name
         self.client.subscribe(
             f"cloud/reg/{self.broker_name}/{self.name}/control", qos=1
         )
-        self.client.subscribe(f"cloud/admin/{self.broker_name}/{self.name}/dev", qos=1)
+        self.client.subscribe(f"cloud/admin/{self.broker_name}/{self.name}/+", qos=1)
         self.client.subscribe(f"cloud/admin/{self.broker_name}/all/+", qos=1)
 
     def stop_client(self):

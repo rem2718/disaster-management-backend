@@ -45,9 +45,12 @@ class MQTTClient:
         except:
             print("Unable to publish, try again")
 
-    def publish_mission(self, broker_name, command):
+    def publish_mission(self, broker_name, command, dev_name=None):
         try:
-            topic = f"cloud/admin/{broker_name}/all/mission"
+            if dev_name:
+                topic = f"cloud/admin/{broker_name}/{dev_name}/mission"
+            else:
+                topic = f"cloud/admin/{broker_name}/all/mission"
             data = {"command": command}
             self.client.connect(self.ip_addr, PORT)
             self.client.publish(topic, payload=json.dumps(data), qos=1)

@@ -76,7 +76,7 @@ def create(user_type, name, broker_id, device_ids, user_ids):
     minlength_validator("Name", name, 3)
     maxlength_validator("Name", name, 20)
     broker_validator(broker_id)
-    device_validator(device_ids, broker_id)
+    device_validator(device_ids, broker_id, True)
     user_validator(user_ids)
     mission = Mission(
         name=name,
@@ -103,11 +103,12 @@ def get_info(user_type, mission_id):
         devices.append(
             {"id": str(device.id), "name": device.name, "type": device.type.value}
         )
+    broker_name = Device.objects.get(id=mission.broker_id.id).name
 
     data = {
         "id": str(mission.id),
         "name": mission.name,
-        "broker_id": str(mission.broker_id),
+        "broker": {"broker_id": str(mission.broker_id.id), "broker_name": broker_name},
         "start_date": mission.start_date,
         "end_date": mission.end_date,
         "status": mission.status.value,
@@ -179,14 +180,26 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         update_cur_mission(mission, "name")
 
     if broker_id:
+        if mission.status != MissionStatus.CREATED:
+            return err_res(409, "You can't update broker id for a starting mission.")
         broker_validator(broker_id)
         mission.broker_id = ObjectId(broker_id)
 
     if device_ids != None:
         added_ids, deleted_ids = split_sets(mission.device_ids, device_ids)
-        device_validator(added_ids)
+        device_validator(added_ids, str(mission.broker_id.id), True)
         update_lists(added_ids, "add_device")
         update_lists(deleted_ids, "delete_device")
+        broker_name = Device.objects.get(id=mission.broker_id.id).name
+        if mission.status != MissionStatus.CREATED:
+            for dev in added_ids:
+                dev_name = Device.objects.get(id=ObjectId(dev)).name
+                mqtt_client.publish_mission(broker_name, "start", dev_name=dev_name)
+                if mission.status == MissionStatus.PAUSED:
+                    mqtt_client.publish_mission(broker_name, "pause", dev_name=dev_name)
+            for dev in deleted_ids:
+                dev_name = Device.objects.get(id=ObjectId(dev)).name
+                mqtt_client.publish_mission(broker_name, "end", dev_name=dev_name)
         mission.device_ids = set(device_ids)
 
     if user_ids != None:
@@ -196,6 +209,11 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         update_lists(deleted_ids, "delete_user", mission)
         mission.user_ids = set(user_ids)
 
+    device_validator(
+        [str(mission.id) for mission in mission.device_ids],
+        str(mission.broker_id.id),
+        False,
+    )
     mission.save()
     data = {
         "message": "mission is updated successfully.",
