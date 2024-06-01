@@ -359,7 +359,7 @@ def update_password(user_id, old_password, new_password):
 @handle_exceptions
 def update_admin_info(user_type, user_id, email, type):
     user = User.objects.get(id=user_id)
-    
+
     if user.status in [UserStatus.PENDING, UserStatus.INACTIVE, UserStatus.REJECTED]:
         return err_res(409, "You can't update this user information.")
 
@@ -414,6 +414,9 @@ def update_password(user_id, old_password, new_password):
 @handle_exceptions
 def delete_user(user_type, user_id):
     user = User.objects.get(id=user_id)
+    if user.status == UserStatus.PENDING:
+        return err_res(409, "Pending users can't be deactivated.")
+    
     if user.status in [UserStatus.INACTIVE, UserStatus.REJECTED]:
         return err_res(409, "User is already Inactive.")
 

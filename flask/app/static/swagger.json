@@ -1307,6 +1307,13 @@
                     },
                     {
                         "in": "query",
+                        "name": "broker",
+                        "type": "string",
+                        "required": false,
+                        "description": "filter for the devices that are connected to the broker_id"
+                    },
+                    {
+                        "in": "query",
                         "name": "mission",
                         "type": "string",
                         "required": false,

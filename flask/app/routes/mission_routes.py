@@ -8,8 +8,6 @@ mission = Blueprint("mission_routes", __name__, url_prefix="/api/missions")
 DEF_PAGE_NUM = 1
 DEF_PAGE_SIZE = 5
 
-# TO-DO: notify brokers/ robots when mission start or end
-
 
 @mission.route("/", methods=["POST"])
 @jwt_required()

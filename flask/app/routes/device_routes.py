@@ -49,9 +49,10 @@ def get_all_route():
     type_list = request.args.getlist("type")
     types = list(map(int, type_list)) if type_list else None
 
-    mission = request.args.get("mission")
-    mission_id = request.args.get("mission") if mission else None
-    return get_all(user_type, page_number, page_size, name, statuses, types, mission_id)
+    broker_id = request.args.get("broker", None)
+    
+    mission_id = request.args.get("mission", None) 
+    return get_all(user_type, page_number, page_size, name, statuses, types, broker_id, mission_id)
 
 
 @device.route("/count", methods=["GET"])

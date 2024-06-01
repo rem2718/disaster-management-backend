@@ -100,7 +100,9 @@ def get_info(user_type, device_id):
 
 @authorize_admin
 @handle_exceptions
-def get_all(user_type, page_number, page_size, name, statuses, types, mission_id):
+def get_all(
+    user_type, page_number, page_size, name, statuses, types, broker_id, mission_id
+):
     query, items = {}, []
 
     if name:
@@ -110,6 +112,10 @@ def get_all(user_type, page_number, page_size, name, statuses, types, mission_id
         query["status__in"] = statuses
     if types:
         query["type__in"] = types
+
+    if broker_id:
+        query["broker_id"] = ObjectId(broker_id)
+
     devices = Device.objects(**query).paginate(page=page_number, per_page=page_size)
 
     if mission_id:

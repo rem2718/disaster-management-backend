@@ -10,8 +10,6 @@ from app.models.device_model import Device
 from app.utils.validators import *
 from app.utils.extensions import *
 
-# TO-DO: mqtt mission
-
 
 def update_cur_mission(mission, type):
     for usr in mission.user_ids:
@@ -68,7 +66,11 @@ def create(user_type, name, broker_id, device_ids, user_ids):
         ["name", "broker_id", "device_ids", "user_ids"],
         [name, broker_id, device_ids, user_ids],
     )
-    existing_mission = Mission.objects(name=name).first()
+    existing_mission = Mission.objects(
+        Q(name=name)
+        & Q(status__ne=MissionStatus.CANCELED)
+        & Q(status__ne=MissionStatus.FINISHED)
+    ).first()
     if existing_mission:
         return err_res(409, "Mission name is already taken.")
     minlength_validator("Name", name, 3)
@@ -152,12 +154,10 @@ def get_all(user_type, page_number, page_size, name, statuses):
 @handle_exceptions
 def get_count(user_type, statuses):
     query = {}
-
     if statuses:
         query["status__in"] = statuses
 
     mission_count = Mission.objects(**query).count()
-
     data = {"status": statuses, "count": mission_count}
 
     return jsonify(data), 200
