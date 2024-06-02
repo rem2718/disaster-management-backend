@@ -7,10 +7,11 @@ COPY acl.conf /mosquitto/config/acl.conf
 COPY passwd /mosquitto/config/passwd
 COPY mosquitto_admin.sh /usr/local/bin/mosquitto_admin.sh
 
-RUN chmod +x /usr/local/bin/mosquitto_admin.sh
 RUN mosquitto_passwd -b /mosquitto/config/passwd admin-broker AdmBro@1984 && \
     mosquitto_passwd -b /mosquitto/config/passwd admin-web AdmWeb@1984
 
+RUN chmod +x /usr/local/bin/mosquitto_admin.sh
+
 EXPOSE 1883
 
-# CMD ["sh", "-c", "/usr/local/bin/mosquitto_admin.sh"]
+CMD sh -c 'sh /usr/local/bin/mosquitto_admin.sh & exec tail -f /dev/null'

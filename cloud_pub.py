@@ -27,9 +27,9 @@ cloud_client = paho.Client(client_id="test-ugv", userdata=None)
 cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
-# cloud_client.username_pw_set("test-broker", "Test-broker12")
+cloud_client.username_pw_set("test-broker", "Test-broker12")
 # cloud_client.username_pw_set("admin-ugv", "UgvAdmin@1984")
-cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
+# cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 
 cloud_client.loop_start()
 # cloud_client.connect("27c434d04ed54e43a4c65102e26353b8.s1.eu.hivemq.cloud", 8883)
@@ -37,10 +37,10 @@ cloud_client.loop_start()
 cloud_client.connect("127.0.0.1", 1883)
 
 # topic = "cloud/admin/user"
-# topic = "cloud/admin/test-broker/test-ugv/dev"
-topic = "cloud/admin/test-broker/all/mission"
+topic = "cloud/admin/test-broker/test-ugv/dev"
+# topic = "cloud/admin/test-broker/all/mission"
 
-data = {"command": "end", "name": "test-broker", "password": "Test-broker12"}
+data = {"command": "start", "name": "test-broker", "password": "Test-broker12"}
 # data = {"username": "test-a", "password": "test"}
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 

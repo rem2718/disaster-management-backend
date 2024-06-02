@@ -31,7 +31,7 @@ create_or_delete_user() {
   fi
 }
 
-# mosquitto -c /mosquitto/config/mosquitto.conf &
+mosquitto -c /mosquitto/config/mosquitto.conf &
 
 mosquitto_sub -h localhost -p 1883 -u admin-broker -P AdmBro@1984 -t cloud/admin/user | while read -r message; do
   create_or_delete_user "$message"
