@@ -85,6 +85,7 @@ def create(user_type, name, broker_id, device_ids, user_ids):
         user_ids=list(set(user_ids)),
     )
     mission.save()
+    Device.objects(id=ObjectId(broker_id)).update(set__status=DeviceStatus.ASSIGNED)
     update_lists(user_ids, "add_user", mission)
     update_lists(device_ids, "add_device")
     data = {
@@ -183,6 +184,8 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         if mission.status != MissionStatus.CREATED:
             return err_res(409, "You can't update broker id for a starting mission.")
         broker_validator(broker_id)
+        Device.objects(id=mission.broker_id).update(set__status=DeviceStatus.AVAILABLE)
+        Device.objects(id=ObjectId(broker_id)).update(set__status=DeviceStatus.ASSIGNED)
         mission.broker_id = ObjectId(broker_id)
 
     if user_ids != None:
@@ -190,7 +193,7 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         added_ids, deleted_ids = split_sets(mission.user_ids, user_ids)
         update_lists(added_ids, "add_user", mission)
         update_lists(deleted_ids, "delete_user", mission)
-        mission.user_ids = list(set(user_ids))
+        mission.user_ids = [ObjectId(user_id) for user_id in set(user_ids)]
 
     if device_ids != None:
         added_ids, deleted_ids = split_sets(mission.device_ids, device_ids)
@@ -207,7 +210,7 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
             for dev in deleted_ids:
                 dev_name = Device.objects.get(id=ObjectId(dev)).name
                 mqtt_client.publish_mission(broker_name, "end", dev_name=dev_name)
-        mission.device_ids = list(set(device_ids))
+        mission.device_ids = [ObjectId(dev_id) for dev_id in set(device_ids)]
 
     device_validator(
         [str(mission.id) for mission in mission.device_ids],

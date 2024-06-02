@@ -1058,7 +1058,7 @@
                 "tags": [
                     "Device Management"
                 ],
-                "summary": "Device Info Retrievement [ADMIN]",
+                "summary": "Device Info Retrievement",
                 "description": "Get Device Information for Admin interface",
                 "parameters": [
                     {

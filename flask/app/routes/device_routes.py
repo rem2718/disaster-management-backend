@@ -31,8 +31,7 @@ def rtmp_auth_route():
 @device.route("/<device_id>", methods=["GET"])
 @jwt_required()
 def get_info_route(device_id):
-    user_type = get_jwt_identity()["type"]
-    return get_info(user_type, device_id)
+    return get_info(device_id)
 
 
 @device.route("/all", methods=["GET"])
@@ -50,9 +49,11 @@ def get_all_route():
     types = list(map(int, type_list)) if type_list else None
 
     broker_id = request.args.get("broker", None)
-    
-    mission_id = request.args.get("mission", None) 
-    return get_all(user_type, page_number, page_size, name, statuses, types, broker_id, mission_id)
+
+    mission_id = request.args.get("mission", None)
+    return get_all(
+        user_type, page_number, page_size, name, statuses, types, broker_id, mission_id
+    )
 
 
 @device.route("/count", methods=["GET"])

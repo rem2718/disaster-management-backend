@@ -258,6 +258,7 @@ def get_cur_missions(user_id, page_number, page_size, name, statuses):
     paginated_missions = missions[start:end]
     data = {
         "items": paginated_missions,
+        "cur_missions_count": total_missions,
         "has_next": page_number < total_pages,
         "has_prev": page_number > 1,
         "page": page_number,
@@ -416,7 +417,7 @@ def delete_user(user_type, user_id):
     user = User.objects.get(id=user_id)
     if user.status == UserStatus.PENDING:
         return err_res(409, "Pending users can't be deactivated.")
-    
+
     if user.status in [UserStatus.INACTIVE, UserStatus.REJECTED]:
         return err_res(409, "User is already Inactive.")
 

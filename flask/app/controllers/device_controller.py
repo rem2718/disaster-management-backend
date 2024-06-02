@@ -67,9 +67,9 @@ def rtmp_auth(name, password):
     return jsonify(data), 200
 
 
-@authorize_admin
+
 @handle_exceptions
-def get_info(user_type, device_id):
+def get_info(device_id):
     null_validator(["Device ID"], [device_id])
     device = Device.objects.get(id=device_id)
     data = {
