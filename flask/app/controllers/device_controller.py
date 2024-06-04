@@ -67,11 +67,11 @@ def rtmp_auth(name, password):
     return jsonify(data), 200
 
 
-
 @handle_exceptions
 def get_info(device_id):
     null_validator(["Device ID"], [device_id])
-    device = Device.objects.get(id=device_id)
+    device = Device.objects.get(id=ObjectId(device_id))
+
     data = {
         "device_id": str(device.id),
         "name": device.name,
@@ -79,7 +79,6 @@ def get_info(device_id):
         "type": device.type,
         "status": device.status,
     }
-
     if device.type != DeviceType.BROKER:
         broker_name = Device.objects.get(id=device.broker_id.id).name
         data["broker"] = {
@@ -88,7 +87,10 @@ def get_info(device_id):
         }
 
     if device.status == DeviceStatus.ASSIGNED:
-        mission = Mission.objects(device_ids=ObjectId(device_id)).first()
+        if device.type == DeviceType.BROKER:
+            mission = Mission.objects(broker_id=ObjectId(device_id)).first()
+        else:
+            mission = Mission.objects(device_ids=ObjectId(device_id)).first()
         data["cur_mission"] = {
             "mission_id": str(mission.id),
             "name": mission.name,
