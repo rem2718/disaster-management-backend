@@ -184,7 +184,9 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
         if mission.status != MissionStatus.CREATED:
             return err_res(409, "You can't update broker id for a starting mission.")
         broker_validator(broker_id)
-        Device.objects(id=mission.broker_id).update(set__status=DeviceStatus.AVAILABLE)
+        Device.objects(id=mission.broker_id.id).update(
+            set__status=DeviceStatus.AVAILABLE
+        )
         Device.objects(id=ObjectId(broker_id)).update(set__status=DeviceStatus.ASSIGNED)
         mission.broker_id = ObjectId(broker_id)
 
