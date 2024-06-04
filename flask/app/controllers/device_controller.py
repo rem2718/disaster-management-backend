@@ -123,6 +123,18 @@ def get_all(
     if mission_id:
         mission_devs = []
         mission = Mission.objects.get(id=mission_id)
+        if DeviceType.BROKER in types:
+            broker = Device.objects.get(id=mission.broker_id.id)
+            items.append(
+                {
+                    "id": str(broker.id),
+                    "name": broker.name,
+                    "type": broker.type,
+                    "status": broker.status,
+                    "in_mission": True,
+                }
+            )
+            mission_devs.append(str(broker.id))
         for dev in mission.device_ids:
             mission_devs.append(str(dev.id))
             device = Device.objects.get(id=str(dev.id))
