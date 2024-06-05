@@ -214,12 +214,14 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
                 mqtt_client.publish_mission(broker_name, "end", dev_name=dev_name)
         mission.device_ids = [ObjectId(dev_id) for dev_id in set(device_ids)]
 
+    broker = broker_id if broker_id else str(mission.broker_id.id)
     device_validator(
-        [str(mission.id) for mission in mission.device_ids],
-        str(mission.broker_id.id),
+        [str(dev.id) for dev in mission.device_ids],
+        broker,
         False,
     )
     mission.save()
+    mission = Mission.objects.get(id=mission_id)
     data = {
         "message": "mission is updated successfully.",
         "id": str(mission.id),
