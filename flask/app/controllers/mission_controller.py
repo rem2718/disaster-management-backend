@@ -272,6 +272,9 @@ def change_status(user_type, mission_id, command):
                 [str(oid.id) for oid in mission.user_ids], "delete_user", mission
             )
             update_lists([str(oid.id) for oid in mission.device_ids], "delete_device")
+            Device.objects(id=mission.broker_id.id).update(
+                set__status=DeviceStatus.AVAILABLE
+            )
             mission.status = MissionStatus.CANCELED
         case "end":
             if mission.status == MissionStatus.CREATED:
@@ -281,6 +284,9 @@ def change_status(user_type, mission_id, command):
             )
             update_lists(
                 [str(device.id) for device in mission.device_ids], "delete_device"
+            )
+            Device.objects(id=mission.broker_id.id).update(
+                set__status=DeviceStatus.AVAILABLE
             )
             mission.status = MissionStatus.FINISHED
             mission.end_date = datetime.now()
