@@ -88,9 +88,17 @@ def get_info(device_id):
 
     if device.status == DeviceStatus.ASSIGNED:
         if device.type == DeviceType.BROKER:
-            mission = Mission.objects(broker_id=ObjectId(device_id)).first()
+            mission = Mission.objects(
+                Q(broker_id=ObjectId(device_id))
+                & Q(status__ne=MissionStatus.CANCELED)
+                & Q(status__ne=MissionStatus.FINISHED)
+            ).first()
         else:
-            mission = Mission.objects(device_ids=ObjectId(device_id)).first()
+            mission = Mission.objects(
+                Q(device_ids=ObjectId(device_id))
+                & Q(status__ne=MissionStatus.CANCELED)
+                & Q(status__ne=MissionStatus.FINISHED)
+            ).first()
         data["cur_mission"] = {
             "mission_id": str(mission.id),
             "name": mission.name,
