@@ -1,15 +1,105 @@
 import subprocess
 import threading
+import pickle
+import os 
 
+from facenet_pytorch import InceptionResnetV1
+import torchvision.transforms as transforms
+from deepface import DeepFace
+import tensorflow as tf
+import requests
+import torch
 import cv2
 
+from model.yolo import YOLOv8_face
+from config import config
+
+torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 class RobotRTMPClient:
     def __init__(self, name, password, link, device_index):
         self.link = f"{link}{name}?username={name}&password={password}"
         self.index = device_index
         self.running = False
+        self.fast = False
+        self.threshold = 0.6
+        self.yolov8 = YOLOv8_face("yolov8n-face.onnx")
+        self.resnet = InceptionResnetV1(pretrained='casia-webface').eval()
+        self.transform = transforms.Compose([
+                transforms.ToPILImage(),  
+                transforms.Resize((224, 224)),  
+                transforms.ToTensor(),  
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  
+            ])
+        self._save_model()
+        if self.fast:
+            self.embeddings = pickle.load(open("embeddings.pkl", "rb"))
+            
+            
+    def _login(self, username, password):
+        login_url = f"{config.get('FLASK_URL')}/api/users/login"
+        data = {"email_or_username": username, "password": password}
+        response = requests.post(login_url, json=data)
+        token = response.json().get("token")
+        return token
 
+    def _get_file(self, token):
+        upload_url = f"{config.get('FLASK_URL')}/api/users/embeddings"
+        headers = {
+            "Authorization": f"Bearer {token}",
+        }
+        response = requests.get(upload_url, headers=headers)
+        return response.content
+
+    def _facenet_recognize(self, face):
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+        face = cv2.resize(face, (150, 150))
+        res = []
+        try:
+            res = DeepFace.find(
+                face,
+                "model",
+                model_name="Facenet",
+                refresh_database=False,
+                silent=True,
+                detector_backend="yolov8"
+                )
+        except Exception as e:
+            pass
+            
+        if len(res) == 0 or len(res[0]["identity"]) == 0:
+            return "Unauthorized [Unknown]"
+        
+        name = os.path.basename(os.path.dirname(res[0]['identity'][0]))
+        return f"Authorized [{name}]"
+
+    def _resnet_recognize(self, face):
+        face = self.transform(face).unsqueeze(0)
+        img_embedding = self.resnet(face)[0, :]
+        min_key = float("inf")
+        person = ""
+        for k, v in self.embeddings.items():
+            cur_key = (v - img_embedding).norm().item()
+            if cur_key < min_key:
+                min_key = cur_key
+                person = k 
+        
+        if min_key >= self.threshold:
+            return 'Unauthorized [Unknown]'
+        return f"Authorized [{person}]"
+    
+    def _save_model(self):
+        username, password = config.get('NAME'), config.get('PASSWORD')
+        token = self._login(username, password)
+        content = self._get_file(token)
+        if self.fast:
+            file = "model/embeddings.pkl"
+        else:
+            file = "model/ds_model_facenet_detector_yolov8_aligned_normalization_base_expand_0.pkl"
+        with open(file, "wb") as f:
+            f.write(content)   
+        
     def _rtmp_process(self):
         command = [
             "ffmpeg",
@@ -64,23 +154,20 @@ class RobotRTMPClient:
             return
 
         def preprocessing():
-            # TO-DO: fill it with your code, its just an example
-            face_cascade = cv2.CascadeClassifier(
-                cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-            )
             while self.running:
-                ret, frame = self.cap.read()
-                if not ret:
-                    print("Error: Failed to read frame from video device.")
-                    continue
-
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                faces = face_cascade.detectMultiScale(
-                    gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
-                )
-                for x, y, w, h in faces:
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
+                _, frame = self.vdo = self.cap.retrieve()
+                frame = cv2.flip(frame, 1)
+                boxes, _, _, _ = self.yolov8.detect(frame)
+                for box in boxes:
+                    x, y, w, h = [int(coord) for coord in box]
+                    face = frame[y:y+h, x:x+w]
+                    if self.fast:
+                        label = self._resnet_recognize(face)
+                    else:
+                        label = self._facenet_recognize(face)
+                    cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+                    cv2.putText(frame, label, (x+5, y-10), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 0, 0), 2)
+                    
                 self.process.stdin.write(frame.tobytes())
             self.cap.release()
 

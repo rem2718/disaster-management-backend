@@ -27,9 +27,9 @@ cloud_client = paho.Client(client_id="test-ugv", userdata=None)
 cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
-cloud_client.username_pw_set("test-broker", "Test-broker12")
+# cloud_client.username_pw_set("test-broker", "Test-broker12")
 # cloud_client.username_pw_set("admin-ugv", "UgvAdmin@1984")
-# cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
+cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 
 cloud_client.loop_start()
 # cloud_client.connect("27c434d04ed54e43a4c65102e26353b8.s1.eu.hivemq.cloud", 8883)
