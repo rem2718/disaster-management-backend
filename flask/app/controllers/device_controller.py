@@ -279,7 +279,7 @@ def update_state(device_id, state):
     if device.type not in [DeviceType.UGV]:
         return err_res(409, "You can't change the state of this device.")
 
-    broker_name = Device.objects.get(id=device.broker_id).name
+    broker_name = Device.objects.get(id=device.broker_id.id).name
     mqtt_data = {"command": "switch", "state": state}
     mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
     data = {
