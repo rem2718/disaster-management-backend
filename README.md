@@ -13,7 +13,11 @@ to run the backend:
 ```
     docker-compose -p disaster-management up --build
 ```
-
+- Note: if you found _Error: Connection refused_ in _mosquitto\_server_ logs please do the following:
+```
+    docker exec -it mosquitto_server /bin/sh
+    nohup /usr/local/bin/mosquitto_admin.sh /proc/1/fd/1 2>/proc/1/fd/2
+```
 and voila! You have the whole backend running: a web server (Flask), an MQTT server (Mosquitto), an RTMP server, and Nginx
 
 

@@ -36,11 +36,11 @@ cloud_client.loop_start()
 # cloud_client.connect("192.168.68.125", 1883)
 cloud_client.connect("127.0.0.1", 1883)
 
-# topic = "cloud/admin/user"
-topic = "cloud/admin/test-broker/test-ugv/dev"
+topic = "cloud/admin/user"
+# topic = "cloud/admin/test-broker/test-ugv/dev"
 # topic = "cloud/admin/test-broker/all/mission"
 
-data = {"command": "start", "name": "test-broker", "password": "Test-broker12"}
+data = {"command": "create", "name": "test-broker", "password": "Test-broker12"}
 # data = {"username": "test-a", "password": "test"}
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 
