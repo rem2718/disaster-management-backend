@@ -11,7 +11,7 @@ import requests
 import torch
 import cv2
 
-from model.yolo import YOLOv8_face
+from models.yolo import YOLOv8_face
 from config import config
 
 torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -34,7 +34,7 @@ class RobotRTMPClient:
             ])
         self._save_model()
         if self.fast:
-            self.embeddings = pickle.load(open("embeddings.pkl", "rb"))
+            self.embeddings = pickle.load(open("models/embeddings.pkl", "rb"))
             
             
     def _login(self, username, password):
@@ -59,7 +59,7 @@ class RobotRTMPClient:
         try:
             res = DeepFace.find(
                 face,
-                "model",
+                "models",
                 model_name="Facenet",
                 refresh_database=False,
                 silent=True,
@@ -94,7 +94,7 @@ class RobotRTMPClient:
         token = self._login(username, password)
         content = self._get_file(token)
         if self.fast:
-            file = "model/embeddings.pkl"
+            file = "models/embeddings.pkl"
         else:
             file = "model/ds_model_facenet_detector_yolov8_aligned_normalization_base_expand_0.pkl"
         with open(file, "wb") as f:
