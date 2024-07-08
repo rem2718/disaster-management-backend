@@ -9,7 +9,7 @@ import requests
 import torch
 import cv2
 
-from yolo import YOLOv8_face
+from models.yolo import YOLOv8_face
 from config import config
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -17,7 +17,7 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 fast = False
 threshold = 0.6
-yolov8 = YOLOv8_face("yolov8n-face.onnx")
+yolov8 = YOLOv8_face("models/yolov8n-face.onnx")
 resnet = InceptionResnetV1(pretrained='casia-webface').eval()
 transform = transforms.Compose([
         transforms.ToPILImage(),  
