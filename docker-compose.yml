@@ -5,8 +5,6 @@ services:
     build:
       context: ./flask
       dockerfile: Dockerfile
-    ports:
-      - "8080:5000"
     networks:
       - backend-network
 
@@ -26,6 +24,7 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
+      - "8080:80"
       - "1935:1935"
     depends_on:
       - flask_server
