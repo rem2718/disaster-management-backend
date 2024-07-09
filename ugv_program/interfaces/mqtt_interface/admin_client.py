@@ -32,6 +32,7 @@ def create_mqtt_user(addr, username, password):
         data = {"username": username, "password": password}
         admin_client.publish(CREATE_TOPIC, payload=json.dumps(data), qos=1)
         admin_client.disconnect()
+        print("MQTT creds are created.")
 
     except KeyboardInterrupt:
         admin_client.disconnect()

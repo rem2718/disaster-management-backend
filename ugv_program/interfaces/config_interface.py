@@ -8,7 +8,7 @@ from config import config
 
 token = dev_name = dev_password = broker_addr = broker_name = None
 login_url = f"{config.get('FLASK_URL')}/api/users/login"
-dev_reg_url = f"{config.get('FLASK_URL')}/api/devices"
+dev_reg_url = f"{config.get('FLASK_URL')}/api/devices/"
 broker_url = f"{config.get('FLASK_URL')}/api/devices/broker_id"
 update_broker_url = f"{config.get('FLASK_URL')}/api/devices/broker"
 device_type_options = ["UGV", "UAV", "DOG", "CHARGING_STATION"]
@@ -69,7 +69,7 @@ def login(username, password, login_window, options):
         messagebox.showerror("Error", f"Failed to login: {e}")
 
 
-def submit(name, password, mac, type, result_label, broker_ip):
+def submit(name, password, mac, type, result_label, broker_ip, root, broker):
     global dev_name, dev_password, broker_addr, broker_name
     dev_name, dev_password, broker_addr = name, password, broker_ip
     broker_mac = get_mac(broker_ip)
@@ -91,6 +91,8 @@ def submit(name, password, mac, type, result_label, broker_ip):
 
         if response.status_code == 201:
             result_label.config(text="Request sent successfully!", foreground="green")
+            broker.destroy()
+            root.destroy()
         else:
             res = response.json()
             result_label.config(
@@ -275,6 +277,8 @@ def config_interface():
             (device_type_options.index(entry_device_type.get()) + 1),
             result_label,
             entry_device_broker.get(),
+            root,
+            broker
         ),
     )
     submit_button.grid(row=6, columnspan=2, pady=10)
@@ -293,3 +297,4 @@ def config_interface():
             "BROKER_NAME": broker_name,
         }
     return skipped, data
+

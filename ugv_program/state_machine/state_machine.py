@@ -97,7 +97,7 @@ class RobotStateMachine:
             admin_queue,
         )
         self.rtmp_client = RobotRTMPClient(
-            self.name, self.password, config.get("RTMP_URL"), 0
+            self.name, self.password, config.get("RTMP_URL"), config.get("INPUT_CAM")
         )
 
     def update_robot(self, data):
@@ -115,7 +115,7 @@ class RobotStateMachine:
         )
         self.rtmp_client.stop_client()
         self.rtmp_client = RobotRTMPClient(
-            self.name, self.password, config.get("RTMP_URL"), 0
+            self.name, self.password, config.get("RTMP_URL"), config.get("INPUT_CAM")
         )
 
     def delete_robot(self, data):
@@ -210,6 +210,7 @@ class RobotStateMachine:
         elem = motion_queue.pop(0) if motion_queue else None
         if elem == None:
             return
+        print(elem)
         _, data = elem
         dev = data["device"]
         if dev == "motor":
