@@ -102,7 +102,30 @@ def logout(user_id):
 
     User.objects.get(id=user_id)
     return jsonify({"message": "User logged out successfully.", "token": ""}), 200
-    
+
+
+@authorize_admin
+@handle_exceptions
+def upload_embeddings(usertype, file):
+    if file.filename == "":
+        return err_res(400, "No Pickle file provided.")
+    if file and file.filename.endswith(".pkl"):
+        file.save("app/static/embeddings.pkl")
+        return jsonify({"message": "The Pickle file is uploaded successfully."}), 200
+    else:
+        return err_res(400, "No Pickle file provided.")
+
+
+@handle_exceptions
+def get_embeddings():
+    filepath = "app/static/embeddings.pkl"
+    if os.path.exists(filepath):
+        file = open(filepath, "rb")
+        return send_file(file, as_attachment=True, download_name="embeddings.pkl")
+    else:
+        return err_res(404, "No Pickle found.")
+
+
 @handle_exceptions
 def get_info(user_id):
     if not user_id:

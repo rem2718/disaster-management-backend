@@ -24,6 +24,7 @@ def login_route():
     password = request.json.get("password", None)
     return login(email_or_username, password)
 
+
 @user.route("/rtmp_auth", methods=["GET"])
 def rtmp_auth_route():
     username = request.args.get("username", None)
@@ -36,6 +37,24 @@ def rtmp_auth_route():
 def logout_route():
     user_id = get_jwt_identity()["id"]
     return logout(user_id)
+
+
+@user.route("/embeddings", methods=["POST"])
+@jwt_required()
+def post_embeddings_route():
+    print("here", request.files)
+    if "file" not in request.files:
+        return err_res(400, "No Pickle file provided.")
+    file = request.files["file"]
+    user_type = get_jwt_identity()["type"]
+    return upload_embeddings(user_type, file)
+
+
+@user.route("/embeddings", methods=["GET"])
+@jwt_required()
+def get_embeddings_route():
+    return get_embeddings()
+
 
 @user.route("/", methods=["GET"])
 @jwt_required()

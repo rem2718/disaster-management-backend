@@ -6,6 +6,7 @@ __pycache__/
 # C extensions
 *.so
 
+AI/images/*
 embeddings.pkl
 ds_model_facenet_detector_yolov8_aligned_normalization_base_expand_0.pkl
 
