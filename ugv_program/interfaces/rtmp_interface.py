@@ -15,8 +15,8 @@ class RobotRTMPClient:
         self.link = f"{link}{name}?username={name}&password={password}"
         self.index = device_index
         self.running = False
-        self.yolov8 = YOLOv8_face("yolov8n-face.onnx")
-        self._save_model()
+        self.yolov8 = YOLOv8_face("models/yolov8n-face.onnx")
+        # self._save_model()
 
     def _login(self, username, password):
         login_url = f"{config.get('FLASK_URL')}/api/users/login"
@@ -118,26 +118,15 @@ class RobotRTMPClient:
 
         def preprocessing():
             while self.running:
-                _, frame = self.vdo = self.cap.retrieve()
+                _, frame = self.cap.read()
                 frame = cv2.flip(frame, 1)
                 boxes, _, _, _ = self.yolov8.detect(frame)
                 for box in boxes:
                     x, y, w, h = [int(coord) for coord in box]
-                    face = frame[y : y + h, x : x + w]
-                    if self.fast:
-                        label = self._resnet_recognize(face)
-                    else:
-                        label = self._facenet_recognize(face)
+                    # face = frame[y : y + h, x : x + w]
+                    # label = self._facenet_recognize(face)
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-                    cv2.putText(
-                        frame,
-                        label,
-                        (x + 5, y - 10),
-                        cv2.FONT_HERSHEY_DUPLEX,
-                        0.6,
-                        (255, 0, 0),
-                        2,
-                    )
+                    # cv2.putText(frame, label, (x + 5, y - 10), cv2.FONT_HERSHEY_DUPLEX, 0.6, (255, 0, 0), 2,)
 
                 self.process.stdin.write(frame.tobytes())
             self.cap.release()

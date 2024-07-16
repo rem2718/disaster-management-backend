@@ -22,6 +22,8 @@ class RobotStateMachine:
 
     def __init__(self):
         self.states = Stack(3)
+        self.SENSOR_INTERVAL = 30
+        self.prev_time = time.time()
 
     def start(self):
         self.transition(RobotEvent.START_INIT)
@@ -141,14 +143,7 @@ class RobotStateMachine:
         self.rtmp_client.start_client()
         while True:
             self.check_admin_queue()
-            data = read_sensor_data()
-            gps = get_gps()
-            if data:
-                topic = f"cloud/reg/{self.broker_name}/{self.name}/sensor-data"
-                self.mqtt_client.publish(topic, data)
-            if gps:
-                topic = f"cloud/reg/{self.broker_name}/{self.name}/gps"
-                self.mqtt_client.publish(topic, data)
+            self.sensor_pub()
             auto_motion()
             time.sleep(WAIT_TIME)
 
@@ -157,14 +152,7 @@ class RobotStateMachine:
         while True:
             self.check_admin_queue()
             self.check_motion_queue()
-            data = read_sensor_data()
-            gps = get_gps()
-            if data:
-                topic = f"cloud/reg/{self.broker_name}/{self.name}/sensor-data"
-                self.mqtt_client.publish(topic, data)
-            if gps:
-                topic = f"cloud/reg/{self.broker_name}/{self.name}/gps"
-                self.mqtt_client.publish(topic, data)
+            self.sensor_pub()
             time.sleep(WAIT_TIME)
 
     def check_admin_queue(self):
@@ -221,3 +209,16 @@ class RobotStateMachine:
             move_arm(data["command"])
         else:
             print("Invalid motion command")
+            
+    def sensor_pub(self):
+        cur_time = time.time() 
+        if cur_time - self.prev_time >= self.SENSOR_INTERVAL:
+            data = read_sensor_data()
+            gps = get_gps()
+            if data:
+                topic = f"cloud/reg/{self.broker_name}/{self.name}/sensor-data"
+                self.mqtt_client.publish(topic, data)
+            if gps:
+                topic = f"cloud/reg/{self.broker_name}/{self.name}/gps"
+                self.mqtt_client.publish(topic, gps)
+            self.prev_time =  cur_time  

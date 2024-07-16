@@ -68,6 +68,7 @@ def login(email_or_username, password):
     token = user.generate_token()
     data = {
         "message": f"User {user.username} loggedin successfully.",
+        "id": str(user.id),
         "username": user.username,
         "type": user.type.value,
         "token": token,
