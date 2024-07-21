@@ -46,11 +46,9 @@ def login(email_or_username, password):
             Q(email=email_or_username) & Q(status__ne=UserStatus.INACTIVE)
         ).first()
     else:
-        print("name")
         user = User.objects(
             Q(username=email_or_username) & Q(status__ne=UserStatus.INACTIVE)
         ).first()
-        print(user)
     if not user or not user.check_password(password):
         return err_res(401, "Invalid email or password.")
 
@@ -317,11 +315,12 @@ def user_approval(user_type, user_id, approved, type):
 def update_info(user_id, username, email, password):
     if not user_id:
         return err_res(400, "Invalid token")
+    
     null_validator(["Password"], [password])
 
     user = User.objects.get(id=user_id)
     
-    if user.check_password(password):
+    if not user.check_password(password):
         return err_res(401, "Invalid password.")
 
     if username:

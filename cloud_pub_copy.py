@@ -39,7 +39,7 @@ topic = "cloud/admin/user"
 # topic2 = "cloud/reg/test-broker/test-dev/sensor-data"
 
 
-data = {"command": "create", "name": "Broker234", "password": "Password@123"}
+data = {"command": "create", "name": "user123", "password": "New_password123"}
 # data = {"command": "start"} 
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 time.sleep(5)
