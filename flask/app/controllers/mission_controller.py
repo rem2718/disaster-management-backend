@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from bson import ObjectId
+
+import pytz
 
 from flask import jsonify
 
@@ -9,7 +11,6 @@ from app.models.mission_model import Mission
 from app.models.device_model import Device
 from app.utils.validators import *
 from app.utils.extensions import *
-
 
 def update_cur_mission(mission, type):
     for usr in mission.user_ids:
@@ -237,7 +238,8 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
 
 @authorize_admin
 @handle_exceptions
-def change_status(user_type, mission_id, command):
+def change_status(user_type, mission_id, command): 
+    saudi_timezone = pytz.timezone('Asia/Riyadh')
     mission = Mission.objects.get(id=mission_id)
     ongoing_statues = [MissionStatus.ONGOING, MissionStatus.PAUSED]
     finished_statues = [MissionStatus.CANCELED, MissionStatus.FINISHED]
@@ -250,7 +252,7 @@ def change_status(user_type, mission_id, command):
             if mission.status in ongoing_statues:
                 return err_res(409, "This mission is already started.")
             mission.status = MissionStatus.ONGOING
-            mission.start_date = datetime.now()
+            mission.start_date = datetime.now(timezone.utc).replace(tzinfo=pytz.utc).astimezone(saudi_timezone)
             mqtt_client.publish_mission(broker_name, "start")
         case "pause":
             if mission.status == MissionStatus.CREATED:
@@ -290,7 +292,7 @@ def change_status(user_type, mission_id, command):
                 set__status=DeviceStatus.AVAILABLE
             )
             mission.status = MissionStatus.FINISHED
-            mission.end_date = datetime.now()
+            mission.end_date = datetime.now(timezone.utc).replace(tzinfo=pytz.utc).astimezone(saudi_timezone)
             mqtt_client.publish_mission(broker_name, "end")
         case _:
             return err_res(400, "the command provided is invalid.")

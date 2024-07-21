@@ -63,7 +63,7 @@ def read_sensor_data():
             "unit": "°/s"
         },
         {
-            "sensor": "ir",
+            "sensor": "infrared",
             "value": ir,
             "unit": ""
         },
@@ -88,7 +88,7 @@ def read_sensor_data():
 
 def get_gps():
     # TO-DO: read gps data here
-    lat = random.uniform(-90, 90)
-    long = random.uniform(-180, 180)
+    lat = random.uniform(-30, 30)
+    long = random.uniform(-30, 30)
     gps = {"lat": lat, "long": long}
     return gps

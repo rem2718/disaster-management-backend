@@ -46,10 +46,11 @@ def login(email_or_username, password):
             Q(email=email_or_username) & Q(status__ne=UserStatus.INACTIVE)
         ).first()
     else:
+        print("name")
         user = User.objects(
             Q(username=email_or_username) & Q(status__ne=UserStatus.INACTIVE)
         ).first()
-
+        print(user)
     if not user or not user.check_password(password):
         return err_res(401, "Invalid email or password.")
 
@@ -316,14 +317,16 @@ def user_approval(user_type, user_id, approved, type):
 def update_info(user_id, username, email, password):
     if not user_id:
         return err_res(400, "Invalid token")
+    null_validator(["Password"], [password])
 
     user = User.objects.get(id=user_id)
+    
     if user.check_password(password):
         return err_res(401, "Invalid password.")
 
     if username:
         if user.username != username:
-            existing_user = User.objects(username=username).first()
+            existing_user = User.objects(Q(username=username) & Q(status__ne=UserStatus.INACTIVE)).first()
             if existing_user:
                 return err_res(409, "Username is already taken.")
         else:
@@ -339,7 +342,7 @@ def update_info(user_id, username, email, password):
 
     if email:
         if user.email != email:
-            existing_user = User.objects(email=email).first()
+            existing_user = User.objects(Q(email=email) & Q(status__ne=UserStatus.INACTIVE)).first()
             if existing_user:
                 return err_res(409, "Email is already taken.")
         else:
@@ -390,7 +393,7 @@ def update_admin_info(user_type, user_id, email, type):
 
     if email:
         if user.email != email:
-            existing_user = User.objects(email=email).first()
+            existing_user = User.objects(Q(email=email) & Q(status__ne=UserStatus.INACTIVE)).first()
             if existing_user:
                 return err_res(409, "Email is already taken.")
         else:

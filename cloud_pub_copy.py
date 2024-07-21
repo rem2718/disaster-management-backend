@@ -33,18 +33,19 @@ cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 cloud_client.loop_start()
 cloud_client.connect("51.79.158.202", 1883)
 
-# topic = "cloud/admin/user"
-topic = "cloud/admin/test-broker/all/mission"
+topic = "cloud/admin/user"
+# topic = "cloud/admin/test-broker/all/mission"
 # topic1 = "cloud/reg/test-broker/test-dev/gps"
 # topic2 = "cloud/reg/test-broker/test-dev/sensor-data"
 
-data = {"command": "start"} 
+
+data = {"command": "create", "name": "Broker234", "password": "Password@123"}
+# data = {"command": "start"} 
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 time.sleep(5)
 
 # data = {"device": "motor", "command": "move", "value": [-1, 1]}
 
-# data = {"command": "start", "name": "test-broker", "password": "Test-broker12"}
 # data = {"command":"switch", "state":"control"}
 # data = {"username": "test-a", "password": "test"}
 

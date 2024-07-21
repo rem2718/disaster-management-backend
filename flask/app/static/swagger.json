@@ -38,7 +38,7 @@
                                 },
                                 "password": {
                                     "type": "string",
-                                    "example": "Password@123",
+                                    "example": "New_password123",
                                     "required": true
                                 },
                                 "username": {
@@ -294,6 +294,10 @@
                                 "email": {
                                     "type": "string",
                                     "example": "new_email@example.com"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "example": "Password@123"
                                 }
                             }
                         }

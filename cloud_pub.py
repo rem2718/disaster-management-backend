@@ -43,8 +43,8 @@ topic1 = "cloud/reg/test-broker/test-dev/gps"
 topic2 = "cloud/reg/test-broker/test-dev/sensor-data"
 
 while True:
-    lat = random.uniform(-90, 90)
-    long = random.uniform(-180, 180)
+    lat = random.uniform(-30, 30)
+    long = random.uniform(-30, 30)
     temp = random.uniform(-20, 50)
     humidity = random.uniform(0, 100)
     gas = random.uniform(100, 1000)
@@ -106,7 +106,7 @@ while True:
             "unit": "°/s"
         },
         {
-            "sensor": "ir",
+            "sensor": "infrared",
             "value": ir,
             "unit": ""
         },
