@@ -212,7 +212,7 @@ def get_count(user_type, statuses, types):
 def get_broker_id(user_type, mac):
     null_validator(["MAC Address"], [mac])
     mac_validator(mac)
-    broker = Device.objects(Q(mac=mac)) & (Q(status__ne=DeviceStatus.INACTIVE)).first()
+    broker = Device.objects(Q(mac=mac) & Q(status__ne=DeviceStatus.INACTIVE)).first()
 
     if broker and broker.type == DeviceType.BROKER:
         data = {"broker_id": str(broker.id), "broker_name": broker.name}
