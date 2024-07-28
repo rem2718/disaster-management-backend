@@ -14,14 +14,14 @@ to run the backend:
 - run this command
 
 ```
-    docker-compose -p disaster-management up --build
+    docker-compose -p disaster-management up --build -d
 ```
 
 - Note: if you found _Error: Connection refused_ in _mosquitto_server_ logs please do the following:
 
 ```
     docker exec -it mosquitto_server /bin/sh
-    nohup /usr/local/bin/mosquitto_admin.sh /proc/1/fd/1 2>/proc/1/fd/2
+    nohup /usr/local/bin/mosquitto_admin.sh /proc/1/fd/1 2>/proc/1/fd/2 &
     # then close the terminal
 ```
 
@@ -118,8 +118,9 @@ The UGV program already includes a Face recognition module. Before running it, y
     #for linux:
     pip3 instll -r requirements.txt
 ```
-- run _face\_taker.py_. It will prompt you to enter your name and take at least 5 images of yourself. Try looking in different directions, making different facial gestures, and under varying lighting conditions to enhance the model's robustness.
+
+- run _face_taker.py_. It will prompt you to enter your name and take at least 5 images of yourself. Try looking in different directions, making different facial gestures, and under varying lighting conditions to enhance the model's robustness.
 - repeat the same process for all the team members.
 - check the _images_ folder to ensure it contains a folder for each member.
-- after preparing the images, edit the _init\_image_ variable in _face\_encoder.py_ to replace my name with yours.
-- finally, execute _face\_encoder.py_ to train the model and send it to the Flask server. Once completed, you're done!
+- after preparing the images, edit the _init_image_ variable in _face_encoder.py_ to replace my name with yours.
+- finally, execute _face_encoder.py_ to train the model and send it to the Flask server. Once completed, you're done!

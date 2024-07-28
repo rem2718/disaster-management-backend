@@ -27,8 +27,8 @@ cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
 
-# cloud_client.username_pw_set("test-broker", "testBroker@1984")
-cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
+cloud_client.username_pw_set("user123", "New_password123")
+# cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 
 cloud_client.loop_start()
 cloud_client.connect("51.79.158.202", 1883)
