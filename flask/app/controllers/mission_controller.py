@@ -178,6 +178,9 @@ def update(user_type, mission_id, name, broker_id, device_ids, user_ids):
     if name and name != mission.name:
         minlength_validator("Name", name, 3)
         maxlength_validator("Name", name, 20)
+        existing_mission = Mission.objects(Q(name=name) & Q(status__ne=MissionStatus.CANCELED) & Q(status__ne=MissionStatus.FINISHED)).first()
+        if existing_mission:
+            return err_res(409, "Mission name is already taken.")
         mission.name = name
         update_cur_mission(mission, "name")
 

@@ -88,5 +88,5 @@ def detect():
             break
 
 
-save_model()
+# save_model()
 detect()
