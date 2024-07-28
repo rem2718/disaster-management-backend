@@ -212,7 +212,7 @@ def get_count(user_type, statuses, types):
 def get_broker_id(user_type, mac):
     null_validator(["MAC Address"], [mac])
     mac_validator(mac)
-    broker = Device.objects(mac=mac).first()
+    broker = Device.objects(Q(mac=mac)) & (Q(status__ne=DeviceStatus.INACTIVE)).first()
 
     if broker and broker.type == DeviceType.BROKER:
         data = {"broker_id": str(broker.id), "broker_name": broker.name}
@@ -335,9 +335,10 @@ def deactivate(user_type, device_id):
         mqtt_client.delete_mqtt_user(device.name)
         Device.objects(broker_id=ObjectId(device_id)).update(set__broker_id=None)
     else:
-        broker_name = Device.objects.get(id=device.broker_id.id).name
-        mqtt_data = {"command": "delete", "name": device.name}
-        mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
+        if device.broker_id: 
+            broker_name = Device.objects.get(id=device.broker_id.id).name
+            mqtt_data = {"command": "delete", "name": device.name}
+            mqtt_client.publish_dev(broker_name, device.name, mqtt_data)
 
     Device.objects(id=device_id).update(set__status=DeviceStatus.INACTIVE)
     return jsonify({"message": "Device is deactivated successfully."}), 200

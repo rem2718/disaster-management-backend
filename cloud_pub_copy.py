@@ -27,8 +27,8 @@ cloud_client.on_connect = on_connect
 cloud_client.on_message = on_message
 cloud_client.on_disconnect = on_disconnect
 
-cloud_client.username_pw_set("user123", "New_password123")
-# cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
+# cloud_client.username_pw_set("user123", "New_password123")
+cloud_client.username_pw_set("admin-web", "AdmWeb@1984")
 
 cloud_client.loop_start()
 cloud_client.connect("51.79.158.202", 1883)
@@ -39,7 +39,7 @@ topic = "cloud/admin/user"
 # topic2 = "cloud/reg/test-broker/test-dev/sensor-data"
 
 
-data = {"command": "create", "name": "user123", "password": "New_password123"}
+data = {"command": "create", "name": "Broker234", "password": "Password@123"}
 # data = {"command": "start"} 
 cloud_client.publish(topic, payload=json.dumps(data), qos=1)
 time.sleep(5)
