@@ -40,7 +40,13 @@ sudo apt-get install -y mosquitto mosquitto-clients
 - copy and paste the configuration file **mosquitto.conf** into your Mosquitto directory
 - place **acl_file.conf** inside your Mosquitto directory
 - create an empty file called _passwd_ with no extention and place it inside mosquitto directory
-- you need to create two admin users, **admin-ugv**, **admin-broker**
+- you need to create two admin users, **admin-ugv**, **admin-broker** for example:
+
+```
+    sudo mosquitto_passwd -b /etc/mosquitto/passwd admin-ugv UgvAdmin@1984
+    sudo mosquitto_passwd -b /etc/mosquitto/passwd admin-broker BroAdmin@1984
+```
+
 - the password for **admin-ugv** should be shared with other devices in order to register users. However, always ensure to save it in the .env file.
 - **admin-broker** is the user that is used in **mqtt_bridge**.
 - Don't forget to save the usernames and passwords in the .env file as the default values might not represent yours.

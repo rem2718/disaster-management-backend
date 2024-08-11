@@ -22,7 +22,7 @@ class RobotStateMachine:
 
     def __init__(self):
         self.states = Stack(3)
-        self.SENSOR_INTERVAL = 30
+        self.SENSOR_INTERVAL = 5
         self.prev_time = time.time()
 
     def start(self):
